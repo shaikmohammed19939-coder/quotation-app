@@ -505,23 +505,21 @@
     .rich-desc ul { margin: 2px 0 2px 18px; padding: 0; list-style: disc; }
     .rich-desc ol { margin: 2px 0 2px 18px; padding: 0; list-style: decimal; }
 
-    .desc-toolbar-wrap { margin-bottom: 4px; }
-    .desc-toolbar {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+    .desc-toolbar-wrap {
+      margin-bottom: 5px;
       background: #eef2fb;
       border: 1px solid #c7d4ee;
       border-radius: 8px;
-      padding: 4px;
+      padding: 5px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
       animation: desc-toolbar-in 160ms ease;
+      position: relative;
     }
-    .desc-toolbar::-webkit-scrollbar { display: none; }
     @keyframes desc-toolbar-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-    .dt-btn {
+    .desc-toolbar-row { display: flex; align-items: center; gap: 5px; }
+    .dt-close-btn, .dt-btn {
       -webkit-tap-highlight-color: transparent;
       flex-shrink: 0;
       height: 30px;
@@ -540,45 +538,101 @@
       justify-content: center;
       transition: background-color 120ms ease, transform 100ms ease;
     }
-    .dt-btn:active { transform: scale(0.92); }
+    .dt-close-btn:active, .dt-btn:active { transform: scale(0.92); }
     .dt-btn.on { background: var(--navy); color: #fff; }
-    .dt-btn select {
+    .dt-dropdown { position: relative; flex: 1; min-width: 0; }
+    .dt-dd-btn {
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+      height: 30px;
+      padding: 0 9px;
       border: 1px solid #c7d4ee;
       border-radius: 6px;
       background: #fff;
       color: var(--navy);
-      font-size: 11px;
+      font-size: 11.5px;
+      font-weight: 600;
       font-family: Montserrat, sans-serif;
-      height: 30px;
-      padding: 0 3px;
-      max-width: 92px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
     }
+    .dt-dd-btn:active { background: #e4eaf9; }
+    .dt-caret { font-size: 9px; opacity: 0.7; }
+    .dt-dd-list {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #c7d4ee;
+      border-radius: 8px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.2);
+      z-index: 60;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      animation: pop-in 140ms ease;
+    }
+    .dt-dd-list-size { width: 120px; }
+    .dt-dd-list button {
+      -webkit-tap-highlight-color: transparent;
+      text-align: left;
+      padding: 8px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 5px;
+      font-size: 12.5px;
+      color: #1d2939;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .dt-dd-list button:active { background: #eef2fb; }
+    .dt-dd-custom {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 8px 2px;
+      border-top: 1px solid #eef0f5;
+      margin-top: 2px;
+    }
+    .dt-dd-custom span { font-size: 11px; color: #667085; }
     .dt-num {
-      width: 34px;
-      height: 30px;
+      width: 48px;
+      height: 28px;
       border: 1px solid #c7d4ee;
       border-radius: 6px;
       text-align: center;
-      font-size: 11px;
+      font-size: 12px;
       font-family: Montserrat, sans-serif;
       color: var(--navy);
     }
     .dt-color-swatch {
-      width: 22px; height: 22px; border-radius: 50%;
+      width: 24px; height: 24px; border-radius: 50%;
       border: 2px solid #fff; box-shadow: 0 0 0 1px #c7d4ee;
       cursor: pointer; flex-shrink: 0;
     }
     .dt-color-popover {
-      display: flex; flex-wrap: wrap; gap: 6px;
+      display: flex; flex-wrap: wrap; gap: 7px;
       position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
       background: #fff;
       border: 1px solid #c7d4ee;
       border-radius: 10px;
-      padding: 8px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
-      z-index: 50;
-      width: 168px;
+      padding: 9px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.2);
+      z-index: 60;
+      width: 172px;
       animation: pop-in 140ms ease;
+    }
+    .dt-color-native {
+      width: 24px; height: 24px; padding: 0; border: none; border-radius: 50%; cursor: pointer;
     }
     @keyframes pop-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
@@ -722,9 +776,11 @@
     body.dark-editor .modal-body { color: #dfe6f5; }
     body.dark-editor .settings-row { color: #dfe6f5; border-bottom-color: #2a3550; }
     body.dark-editor .settings-group h4 { color: #7fb0ff; }
-    body.dark-editor .desc-toolbar { background: #1a2333; border-color: #2a3550; }
-    body.dark-editor .dt-btn { background: #232f45; color: #dfe6f5; }
-    body.dark-editor .dt-color-popover { background: #1a2333; border-color: #2a3550; }
+    body.dark-editor .desc-toolbar-wrap { background: #1a2333; border-color: #2a3550; }
+    body.dark-editor .dt-btn, body.dark-editor .dt-close-btn, body.dark-editor .dt-dd-btn { background: #232f45; color: #dfe6f5; border-color: #2a3550; }
+    body.dark-editor .dt-color-popover, body.dark-editor .dt-dd-list { background: #232f45; border-color: #2a3550; }
+    body.dark-editor .dt-dd-list button { color: #dfe6f5; }
+    body.dark-editor .dt-dd-list button:active { background: #2a3550; }
 
     /* ===== Buttons ripple ===== */
     .ripple-surface { position: relative; overflow: hidden; }
@@ -749,7 +805,7 @@
     body.pdf-exporting .app-bar,
     body.pdf-exporting .editor-toolbar,
     body.pdf-exporting .save-status,
-    body.pdf-exporting .desc-toolbar,
+    body.pdf-exporting .desc-toolbar-wrap,
     body.pdf-exporting .row-actions,
     body.pdf-exporting #splash {
       display: none !important;
@@ -1078,60 +1134,100 @@
     }
 
     /* ===================== Description rich-text editor ===================== */
-    function DescToolbar({ onCmd, onFont, onSize, onColor, onAlign, activeFormats, currentSize }) {
+    function DescToolbar({ onCmd, onFont, onSize, onColor, activeFormats, onClose }) {
+      const [fontOpen, setFontOpen] = useState(false);
+      const [sizeOpen, setSizeOpen] = useState(false);
       const [colorOpen, setColorOpen] = useState(false);
-      const [sizeInput, setSizeInput] = useState(currentSize || 12.5);
+      const [sizeInput, setSizeInput] = useState(12);
 
-      useEffect(() => { setSizeInput(currentSize || 12.5); }, [currentSize]);
+      // Prevents the browser's default mousedown action (which would shift
+      // focus off the description field and collapse the text selection)
+      // while still letting the click/onClick handler run normally. This is
+      // the standard technique rich-text toolbars use so a tap on a button
+      // never loses the user's selection.
+      const noSteal = (e) => e.preventDefault();
+
+      const closeAllPopups = () => { setFontOpen(false); setSizeOpen(false); setColorOpen(false); };
+
+      const applySize = (v) => {
+        const n = Number(v);
+        if (n >= 6 && n <= 96) { onSize(n); closeAllPopups(); }
+      };
 
       return (
-        <div className="desc-toolbar-wrap no-print" onMouseDown={(e) => e.preventDefault()}>
-          <div className="desc-toolbar">
-            <select
-              className="dt-btn"
-              style={{ width: 108, fontWeight: 500 }}
-              defaultValue=""
-              onChange={(e) => { if (e.target.value) onFont(e.target.value); e.target.value = ''; }}
-              title="Font"
-            >
-              <option value="" disabled>Font ▾</option>
-              {FONT_FAMILIES.map((f) => (
-                <option key={f.label} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>
-              ))}
-            </select>
-
-            <select
-              className="dt-btn"
-              style={{ width: 62, fontWeight: 500 }}
-              value={FONT_SIZES.includes(Number(sizeInput)) ? Number(sizeInput) : ''}
-              onChange={(e) => { const v = Number(e.target.value); setSizeInput(v); onSize(v); }}
-              title="Font size"
-            >
-              <option value="" disabled>pt ▾</option>
-              {FONT_SIZES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <input
-              type="number"
-              className="dt-num"
-              value={sizeInput}
-              min={6}
-              max={96}
-              onChange={(e) => setSizeInput(e.target.value)}
-              onBlur={() => { const v = Number(sizeInput); if (v >= 6 && v <= 96) onSize(v); }}
-              title="Custom size"
-            />
-
-            <div className="tb-sep" />
-
-            <button type="button" className={`dt-btn ${activeFormats.bold ? 'on' : ''}`} onClick={() => onCmd('bold')} title="Bold"><IconBold className="h-[14px] w-[14px]" /></button>
-            <button type="button" className={`dt-btn ${activeFormats.italic ? 'on' : ''}`} onClick={() => onCmd('italic')} title="Italic"><IconItalic className="h-[14px] w-[14px]" /></button>
-            <button type="button" className={`dt-btn ${activeFormats.underline ? 'on' : ''}`} onClick={() => onCmd('underline')} title="Underline"><IconUnderline className="h-[14px] w-[14px]" /></button>
-            <button type="button" className={`dt-btn ${activeFormats.strikeThrough ? 'on' : ''}`} onClick={() => onCmd('strikeThrough')} title="Strikethrough"><IconStrike className="h-[14px] w-[14px]" /></button>
-
-            <div className="tb-sep" />
-
-            <div style={{ position: 'relative' }}>
-              <button type="button" className="dt-btn" onClick={() => setColorOpen((v) => !v)} title="Text color">
+        <div className="desc-toolbar-wrap no-print">
+          <div className="desc-toolbar-row">
+            <button type="button" className="dt-close-btn" onMouseDown={noSteal} onClick={onClose} title="Close formatting">
+              <IconBack className="h-[14px] w-[14px]" />
+            </button>
+            <div className="dt-dropdown">
+              <button
+                type="button"
+                className="dt-dd-btn"
+                onMouseDown={noSteal}
+                onClick={() => { setFontOpen((v) => !v); setSizeOpen(false); setColorOpen(false); }}
+              >
+                Font <span className="dt-caret">▾</span>
+              </button>
+              {fontOpen && (
+                <div className="dt-dd-list" onMouseDown={noSteal}>
+                  {FONT_FAMILIES.map((f) => (
+                    <button type="button" key={f.label} style={{ fontFamily: f.value }} onClick={() => { onFont(f.value); closeAllPopups(); }}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="dt-dropdown">
+              <button
+                type="button"
+                className="dt-dd-btn"
+                onMouseDown={noSteal}
+                onClick={() => { setSizeOpen((v) => !v); setFontOpen(false); setColorOpen(false); }}
+              >
+                Size <span className="dt-caret">▾</span>
+              </button>
+              {sizeOpen && (
+                <div className="dt-dd-list dt-dd-list-size" onMouseDown={noSteal}>
+                  {FONT_SIZES.map((s) => (
+                    <button type="button" key={s} onClick={() => { onSize(s); closeAllPopups(); }}>{s} pt</button>
+                  ))}
+                  <div className="dt-dd-custom">
+                    <input
+                      type="number"
+                      className="dt-num"
+                      min={6}
+                      max={96}
+                      value={sizeInput}
+                      onChange={(e) => setSizeInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') applySize(sizeInput); }}
+                    />
+                    <span>pt</span>
+                    <button type="button" className="dt-close-btn" style={{ marginLeft: 'auto' }} onClick={() => applySize(sizeInput)}>Set</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="desc-toolbar-row">
+            <button type="button" className={`dt-btn ${activeFormats.bold ? 'on' : ''}`} onMouseDown={noSteal} onClick={() => onCmd('bold')} title="Bold">
+              <IconBold className="h-[14px] w-[14px]" />
+            </button>
+            <button type="button" className={`dt-btn ${activeFormats.italic ? 'on' : ''}`} onMouseDown={noSteal} onClick={() => onCmd('italic')} title="Italic">
+              <IconItalic className="h-[14px] w-[14px]" />
+            </button>
+            <button type="button" className={`dt-btn ${activeFormats.underline ? 'on' : ''}`} onMouseDown={noSteal} onClick={() => onCmd('underline')} title="Underline">
+              <IconUnderline className="h-[14px] w-[14px]" />
+            </button>
+            <div className="dt-dropdown" style={{ flex: '0 0 auto' }}>
+              <button
+                type="button"
+                className="dt-btn"
+                onMouseDown={noSteal}
+                onClick={() => { setColorOpen((v) => !v); setFontOpen(false); setSizeOpen(false); }}
+                title="Text color"
+              >
                 <IconPalette className="h-[14px] w-[14px]" />
               </button>
               {colorOpen && (
@@ -1140,36 +1236,24 @@
                     <span
                       key={c.value}
                       className="dt-color-swatch"
-                      style={{ background: c.value, boxShadow: c.value === '#FFFFFF' ? '0 0 0 1px #c7d4ee' : '0 0 0 1px #c7d4ee' }}
+                      style={{ background: c.value }}
                       title={c.label}
-                      onClick={() => { onColor(c.value); setColorOpen(false); }}
+                      onMouseDown={noSteal}
+                      onClick={() => { onColor(c.value); closeAllPopups(); }}
                     />
                   ))}
+                  {/* The native color input necessarily steals focus to open its
+                      OS picker — RichDescriptionEditor restores the saved text
+                      selection before applying the chosen color. */}
                   <input
                     type="color"
-                    style={{ width: 22, height: 22, padding: 0, border: 'none', borderRadius: '50%', cursor: 'pointer' }}
-                    onChange={(e) => { onColor(e.target.value); setColorOpen(false); }}
+                    className="dt-color-native"
+                    onChange={(e) => { onColor(e.target.value); closeAllPopups(); }}
                     title="Custom color"
                   />
                 </div>
               )}
             </div>
-
-            <div className="tb-sep" />
-
-            <button type="button" className={`dt-btn ${activeFormats.align === 'left' ? 'on' : ''}`} onClick={() => onAlign('justifyLeft')} title="Align left"><IconAlignLeft className="h-[14px] w-[14px]" /></button>
-            <button type="button" className={`dt-btn ${activeFormats.align === 'center' ? 'on' : ''}`} onClick={() => onAlign('justifyCenter')} title="Align center"><IconAlignCenter className="h-[14px] w-[14px]" /></button>
-            <button type="button" className={`dt-btn ${activeFormats.align === 'right' ? 'on' : ''}`} onClick={() => onAlign('justifyRight')} title="Align right"><IconAlignRight className="h-[14px] w-[14px]" /></button>
-
-            <div className="tb-sep" />
-
-            <button type="button" className="dt-btn" onClick={() => onCmd('insertUnorderedList')} title="Bullet list"><IconBullet className="h-[14px] w-[14px]" /></button>
-            <button type="button" className="dt-btn" onClick={() => onCmd('insertOrderedList')} title="Numbered list"><IconNumbered className="h-[14px] w-[14px]" /></button>
-
-            <div className="tb-sep" />
-
-            <button type="button" className="dt-btn" onClick={() => onCmd('undo')} title="Undo"><IconUndo className="h-[14px] w-[14px]" /></button>
-            <button type="button" className="dt-btn" onClick={() => onCmd('redo')} title="Redo"><IconRedo className="h-[14px] w-[14px]" /></button>
           </div>
         </div>
       );
@@ -1177,10 +1261,11 @@
 
     function RichDescriptionEditor({ value, onChange, placeholder, defaultStyle }) {
       const ref = useRef(null);
+      const containerRef = useRef(null);
       const [active, setActive] = useState(false);
       const [activeFormats, setActiveFormats] = useState({});
-      const [currentSize, setCurrentSize] = useState(12.5);
       const blurTimeout = useRef(null);
+      const savedRangeRef = useRef(null);
 
       useEffect(() => {
         if (ref.current && document.activeElement !== ref.current && ref.current.innerHTML !== (value || '')) {
@@ -1192,32 +1277,63 @@
         if (ref.current) onChange(ref.current.innerHTML);
       };
 
+      // Continuously remember the caret/selection while the field itself is
+      // focused, so we can restore it after focus is (unavoidably) stolen by
+      // a native control like the color <input>.
+      const captureSelection = () => {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && ref.current && ref.current.contains(sel.anchorNode)) {
+          savedRangeRef.current = sel.getRangeAt(0).cloneRange();
+        }
+      };
+
       const refreshFormatState = () => {
         try {
           setActiveFormats({
             bold: document.queryCommandState('bold'),
             italic: document.queryCommandState('italic'),
-            underline: document.queryCommandState('underline'),
-            strikeThrough: document.queryCommandState('strikeThrough'),
-            align: document.queryCommandState('justifyCenter') ? 'center' : document.queryCommandState('justifyRight') ? 'right' : 'left'
+            underline: document.queryCommandState('underline')
           });
         } catch {}
       };
 
-      const withFocus = (fn) => {
-        if (ref.current) ref.current.focus();
-        try { document.execCommand('styleWithCSS', false, true); } catch {}
+      const restoreSelection = () => {
+        if (!ref.current) return;
+        ref.current.focus();
+        if (savedRangeRef.current) {
+          try {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(savedRangeRef.current);
+          } catch {}
+        }
+      };
+
+      const withSelection = (fn) => {
+        restoreSelection();
         fn();
+        captureSelection();
         emitChange();
         refreshFormatState();
       };
 
-      const onCmd = (cmd) => withFocus(() => { try { document.execCommand(cmd, false, null); } catch {} });
-      const onAlign = (cmd) => withFocus(() => { try { document.execCommand(cmd, false, null); } catch {} });
-      const onFont = (fontValue) => withFocus(() => { try { document.execCommand('fontName', false, fontValue); } catch {} });
-      const onColor = (hex) => withFocus(() => { try { document.execCommand('foreColor', false, hex); } catch {} });
-      const onSize = (px) => withFocus(() => {
+      const onCmd = (cmd) => withSelection(() => {
+        try { document.execCommand('styleWithCSS', false, true); document.execCommand(cmd, false, null); } catch {}
+      });
+      const onFont = (fontValue) => withSelection(() => {
+        try { document.execCommand('styleWithCSS', false, true); document.execCommand('fontName', false, fontValue); } catch {}
+      });
+      const onColor = (hex) => withSelection(() => {
+        try { document.execCommand('styleWithCSS', false, true); document.execCommand('foreColor', false, hex); } catch {}
+      });
+      const onSize = (px) => withSelection(() => {
         try {
+          // styleWithCSS must be OFF for this one command: with it on, Chrome
+          // writes `font-size: xxx-large` (the CSS keyword for legacy size 7)
+          // as inline CSS instead of a <font size="7"> element, so the
+          // find-and-replace below would never match anything and the actual
+          // pixel size we want never gets applied.
+          document.execCommand('styleWithCSS', false, false);
           document.execCommand('fontSize', false, '7');
           if (ref.current) {
             ref.current.querySelectorAll('font[size="7"]').forEach((el) => {
@@ -1225,21 +1341,47 @@
               el.style.fontSize = px + 'px';
             });
           }
-          setCurrentSize(px);
         } catch {}
       });
 
+      const closeToolbar = () => {
+        setActive(false);
+        if (ref.current) ref.current.blur();
+      };
+
+      useEffect(() => {
+        if (active && containerRef.current) {
+          const t = setTimeout(() => {
+            try { containerRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
+          }, 80);
+          return () => clearTimeout(t);
+        }
+      }, [active]);
+
       return (
-        <div>
+        <div
+          ref={containerRef}
+          onFocus={() => {
+            if (blurTimeout.current) { clearTimeout(blurTimeout.current); blurTimeout.current = null; }
+            setActive(true);
+          }}
+          onBlur={(e) => {
+            // Focus moving to a control still inside this editor (a toolbar
+            // button/dropdown/color input) must not hide the toolbar.
+            if (containerRef.current && e.relatedTarget && containerRef.current.contains(e.relatedTarget)) return;
+            blurTimeout.current = setTimeout(() => {
+              if (!containerRef.current || !containerRef.current.contains(document.activeElement)) setActive(false);
+            }, 220);
+          }}
+        >
           {active && (
             <DescToolbar
               onCmd={onCmd}
               onFont={onFont}
               onSize={onSize}
               onColor={onColor}
-              onAlign={onAlign}
               activeFormats={activeFormats}
-              currentSize={currentSize}
+              onClose={closeToolbar}
             />
           )}
           <div
@@ -1249,17 +1391,11 @@
             suppressContentEditableWarning
             data-placeholder={placeholder}
             style={defaultStyle}
-            onFocus={() => {
-              if (blurTimeout.current) clearTimeout(blurTimeout.current);
-              setActive(true);
-              refreshFormatState();
-            }}
-            onBlur={() => {
-              blurTimeout.current = setTimeout(() => setActive(false), 160);
-            }}
-            onInput={() => { emitChange(); refreshFormatState(); }}
-            onMouseUp={refreshFormatState}
-            onKeyUp={refreshFormatState}
+            onFocus={refreshFormatState}
+            onInput={() => { emitChange(); refreshFormatState(); captureSelection(); }}
+            onMouseUp={() => { captureSelection(); refreshFormatState(); }}
+            onKeyUp={() => { captureSelection(); refreshFormatState(); }}
+            onSelect={captureSelection}
             onFocusCapture={(e) => {
               setTimeout(() => {
                 try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
