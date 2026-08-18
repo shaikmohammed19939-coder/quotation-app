@@ -6,7 +6,7 @@
   <title>Waterproofing Specialist Quotation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   <meta name="theme-color" content="#0B2E6D" />
   <script src="https://cdn.tailwindcss.com">
   </script>
@@ -618,22 +618,39 @@
       cursor: pointer; flex-shrink: 0;
     }
     .dt-color-popover {
-      display: flex; flex-wrap: wrap; gap: 7px;
+      display: flex; flex-direction: column; gap: 8px;
       position: absolute;
       top: calc(100% + 4px);
       left: 0;
       background: #fff;
       border: 1px solid #c7d4ee;
       border-radius: 10px;
-      padding: 9px;
+      padding: 10px;
       box-shadow: 0 10px 28px rgba(0,0,0,0.2);
       z-index: 60;
-      width: 172px;
+      width: 206px;
       animation: pop-in 140ms ease;
     }
-    .dt-color-native {
-      width: 24px; height: 24px; padding: 0; border: none; border-radius: 50%; cursor: pointer;
+    .dt-color-swatch-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .dt-color-custom-row {
+      display: flex; align-items: center; gap: 7px;
+      padding-top: 8px; border-top: 1px solid #eef0f5;
     }
+    .dt-color-native {
+      width: 30px; height: 30px; padding: 0; border: 1px solid #c7d4ee; border-radius: 8px; cursor: pointer; flex-shrink: 0;
+    }
+    .dt-color-hex {
+      flex: 1; min-width: 0;
+      height: 30px;
+      border: 1px solid #c7d4ee;
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-family: Montserrat, sans-serif;
+      color: var(--navy);
+      text-transform: uppercase;
+    }
+    .dt-color-apply { width: 100%; font-weight: 600; }
     @keyframes pop-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
     /* ===== Row action buttons ===== */
@@ -759,7 +776,7 @@
     .splash-progress-bar {
       height: 100%; width: 0%; border-radius: 3px;
       background: linear-gradient(90deg, #4d86ff, #7be0a0);
-      animation: splash-progress 3s linear forwards;
+      animation: splash-progress 3.5s linear forwards;
     }
     @keyframes splash-progress { to { width: 100%; } }
     .splash-loading-text {
@@ -811,6 +828,116 @@
       display: none !important;
       visibility: hidden !important;
     }
+
+    /* ===================== Home screen ===================== */
+    .home-screen {
+      min-height: 100vh;
+      background: #eef1f7;
+      padding-bottom: 32px;
+      animation: fade-in 220ms ease;
+    }
+    .home-header {
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-dark) 100%);
+      padding: 22px 18px 20px;
+      color: #fff;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    }
+    .home-title { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: 0.03em; }
+    .home-subtitle { font-family: Montserrat, sans-serif; font-size: 11.5px; opacity: 0.75; margin-top: 3px; }
+    .home-search-wrap { padding: 16px 16px 0; }
+    .home-search {
+      display: flex; align-items: center; gap: 8px;
+      background: #fff; border-radius: 12px; padding: 10px 14px;
+      box-shadow: 0 2px 10px rgba(11,46,109,0.08);
+    }
+    .home-search input {
+      border: none; outline: none; flex: 1; font-size: 13.5px; font-family: Montserrat, sans-serif; color: #1d2939; background: transparent;
+    }
+    .home-create-wrap { padding: 16px; }
+    .home-create-btn {
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: linear-gradient(135deg, var(--brandblue), var(--navy));
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-family: Montserrat, sans-serif;
+      font-weight: 700;
+      font-size: 14.5px;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(26,86,196,0.35);
+      transition: transform 120ms ease;
+    }
+    .home-create-btn:active { transform: scale(0.98); }
+    .home-section-label {
+      padding: 4px 20px 8px;
+      font-family: Montserrat, sans-serif;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .home-card-list { padding: 0 16px; display: flex; flex-direction: column; gap: 12px; }
+    .qcard {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 2px 12px rgba(11,46,109,0.08);
+      cursor: pointer;
+      animation: qcard-in 260ms ease both;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+    }
+    .qcard:active { transform: scale(0.985); }
+    @keyframes qcard-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .qcard-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .qcard-name { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14.5px; color: var(--navy); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .qcard-badge { flex-shrink: 0; font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em; color: var(--brandblue); background: #eaf0fd; padding: 3px 8px; border-radius: 6px; }
+    .qcard-meta { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-family: Montserrat, sans-serif; font-size: 11.5px; color: #64748b; }
+    .qcard-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f2f7; }
+    .qcard-total { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13.5px; color: var(--navy); }
+    .qcard-actions { display: flex; gap: 4px; }
+    .qcard-act {
+      -webkit-tap-highlight-color: transparent;
+      width: 32px; height: 32px; border-radius: 50%; border: none; background: #f2f5fb;
+      color: var(--navy); display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .qcard-act:active { background: #e4eaf9; }
+    .qcard-act-danger { color: #d32f2f; }
+    .qcard-act-danger:active { background: #fde8e8; }
+    .home-empty {
+      margin: 40px 24px; text-align: center; color: #94a3b8;
+      font-family: Montserrat, sans-serif; font-size: 13px; line-height: 20px;
+    }
+    .home-empty-icon { font-size: 40px; margin-bottom: 10px; }
+
+    /* ===================== Layout Edit Mode ===================== */
+    .layout-editing { outline: 2px dashed #1A56C4; cursor: grab; }
+    .layout-editing:active { cursor: grabbing; }
+    .layout-drag-label {
+      position: absolute;
+      top: -20px;
+      left: 0;
+      background: #1A56C4;
+      color: #fff;
+      font-family: Montserrat, sans-serif;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 3px 8px;
+      border-radius: 5px 5px 5px 0;
+      white-space: nowrap;
+      z-index: 6;
+      pointer-events: none;
+    }
+    body.pdf-exporting .layout-editing { outline: none !important; }
   </style>
 </head>
 <body>
@@ -829,7 +956,7 @@
   <script>
     (function () {
       document.documentElement.classList.add('has-shell');
-      var MIN_SPLASH_MS = 3000;
+      var MIN_SPLASH_MS = 3500;
       var start = Date.now();
       function hideSplash() {
         var el = document.getElementById('splash');
@@ -843,7 +970,7 @@
         setTimeout(hideSplash, remain);
       };
       // Safety net: never keep the splash up longer than ~4.5s even if the app fails to signal ready.
-      setTimeout(hideSplash, 4500);
+      setTimeout(hideSplash, 5200);
     })();
   </script>
 
@@ -908,8 +1035,7 @@
 
     const footerBadges = [
       { icon: 'water-drop', label: 'QUALITY WORK' },
-      { icon: 'handshake', label: 'TIMELY SERVICE' },
-      { icon: 'shield-check', label: 'LONG LASTING PROTECTION' }
+      { icon: 'handshake', label: 'TIMELY SERVICE' }
     ];
 
     const STORAGE_FIELDS = 'quotation_fields_v1';
@@ -986,22 +1112,172 @@
       }
     }
 
+    async function idbDelete(key) {
+      try {
+        const db = await openIDB();
+        return await new Promise((resolve, reject) => {
+          const tx = db.transaction(IDB_STORE, 'readwrite');
+          tx.objectStore(IDB_STORE).delete(key);
+          tx.oncomplete = () => resolve(true);
+          tx.onerror = () => reject(tx.error);
+        });
+      } catch (e) { return false; }
+    }
+
+    /* ===================== Multi-quotation storage ===================== */
+    const QUOTATIONS_INDEX_KEY = 'quotations_index_v1';
+
+    function quotationDocKey(id) { return 'quotation_doc_' + id; }
+
+    function makeQuotationId() {
+      return 'q_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8);
+    }
+
+    async function loadQuotationIndex() {
+      const idx = await idbGet(QUOTATIONS_INDEX_KEY);
+      return Array.isArray(idx) ? idx : [];
+    }
+
+    async function saveQuotationIndex(list) {
+      await idbSet(QUOTATIONS_INDEX_KEY, list);
+    }
+
+    function summarizeDoc(id, doc) {
+      const fields = doc.fields || {};
+      const name = fields.clientName
+        ? fields.clientName
+        : (fields.quotationNo ? `Quotation ${fields.quotationNo}` : 'Untitled Quotation');
+      return {
+        id,
+        name,
+        quotationNo: fields.quotationNo || '',
+        clientName: fields.clientName || '',
+        date: fields.date || '',
+        total: fields.total || '',
+        docType: doc.docType || 'quotation',
+        createdAt: doc.createdAt || Date.now(),
+        updatedAt: doc.updatedAt || Date.now()
+      };
+    }
+
+    async function upsertIndexEntry(id, doc) {
+      const list = await loadQuotationIndex();
+      const summary = summarizeDoc(id, doc);
+      const i = list.findIndex((q) => q.id === id);
+      if (i >= 0) list[i] = summary; else list.unshift(summary);
+      await saveQuotationIndex(list);
+      return list;
+    }
+
+    async function removeIndexEntry(id) {
+      const list = await loadQuotationIndex();
+      const next = list.filter((q) => q.id !== id);
+      await saveQuotationIndex(next);
+      return next;
+    }
+
+    function blankQuotationDoc() {
+      return {
+        fields: {
+          quotationNo: '', date: '', clientName: '', siteAddress: '', contactNo: '',
+          emailId: '', workDescription: '', total: '', sigName: '', sigMobile: ''
+        },
+        items: [{ id: 1, description: '', unit: '', qty: '', rate: '', amount: '' }],
+        docType: 'quotation',
+        images: { logo: null, signature: null, stamp: null },
+        tableSettings: { ...DEFAULT_TABLE_SETTINGS },
+        layout: {},
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+    }
+
+    async function createNewQuotation() {
+      const id = makeQuotationId();
+      const doc = blankQuotationDoc();
+      await idbSet(quotationDocKey(id), doc);
+      await upsertIndexEntry(id, doc);
+      return id;
+    }
+
+    async function duplicateQuotationRecord(id) {
+      const doc = await idbGet(quotationDocKey(id));
+      if (!doc) return null;
+      const newId = makeQuotationId();
+      const clone = {
+        ...doc,
+        fields: { ...doc.fields },
+        items: (doc.items || []).map((it) => ({ ...it })),
+        images: { ...(doc.images || {}) },
+        tableSettings: { ...(doc.tableSettings || DEFAULT_TABLE_SETTINGS) },
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+      };
+      await idbSet(quotationDocKey(newId), clone);
+      await upsertIndexEntry(newId, clone);
+      return newId;
+    }
+
+    async function deleteQuotationRecord(id) {
+      await idbDelete(quotationDocKey(id));
+      await removeIndexEntry(id);
+    }
+
+    // One-time migration: older versions of this app stored a single
+    // document under DOC_KEY / legacy localStorage keys. Fold that into the
+    // new multi-quotation index the first time it's found, so nobody loses
+    // their existing draft.
+    async function migrateLegacyDraftIfNeeded() {
+      const existingIndex = await idbGet(QUOTATIONS_INDEX_KEY);
+      if (Array.isArray(existingIndex)) return; // already migrated
+      let legacyDoc = await idbGet(DOC_KEY);
+      if (!legacyDoc) {
+        const lsFields = loadJSON(STORAGE_FIELDS, null);
+        const lsItems = loadJSON(STORAGE_ITEMS, null);
+        if (lsFields || lsItems) {
+          legacyDoc = {
+            fields: lsFields || {},
+            items: (lsItems && lsItems.length) ? lsItems : [{ id: 1, description: '', unit: '', qty: '', rate: '', amount: '' }],
+            docType: loadJSON(STORAGE_DOCTYPE, 'quotation'),
+            images: { logo: loadJSON(STORAGE_LOGO, null), signature: loadJSON(STORAGE_SIG, null), stamp: loadJSON(STORAGE_STAMP, null) },
+            tableSettings: { ...DEFAULT_TABLE_SETTINGS }
+          };
+        }
+      }
+      if (legacyDoc && (legacyDoc.fields || legacyDoc.items)) {
+        const id = makeQuotationId();
+        const doc = {
+          ...blankQuotationDoc(),
+          ...legacyDoc,
+          createdAt: legacyDoc.createdAt || Date.now(),
+          updatedAt: legacyDoc.updatedAt || Date.now()
+        };
+        await idbSet(quotationDocKey(id), doc);
+        await upsertIndexEntry(id, doc);
+      } else {
+        await saveQuotationIndex([]);
+      }
+    }
+
     /* ===================== Formatting options ===================== */
     const FONT_FAMILIES = [
       { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
       { label: 'Calibri', value: 'Calibri, Candara, "Segoe UI", sans-serif' },
-      { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
+      { label: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
       { label: 'Georgia', value: 'Georgia, serif' },
-      { label: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
-      { label: 'Tahoma', value: 'Tahoma, Geneva, sans-serif' },
-      { label: 'Trebuchet MS', value: '"Trebuchet MS", sans-serif' },
-      { label: 'Courier New', value: '"Courier New", Courier, monospace' },
-      { label: 'Garamond', value: 'Garamond, "EB Garamond", serif' },
+      { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
       { label: 'Cambria', value: 'Cambria, Georgia, serif' },
+      { label: 'Garamond', value: 'Garamond, "EB Garamond", serif' },
+      { label: 'Trebuchet MS', value: '"Trebuchet MS", sans-serif' },
+      { label: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
       { label: 'Poppins', value: '"Poppins", Arial, sans-serif' },
-      { label: 'Montserrat', value: '"Montserrat", Arial, sans-serif' }
+      { label: 'Montserrat', value: '"Montserrat", Arial, sans-serif' },
+      { label: 'Roboto', value: '"Roboto", Arial, sans-serif' }
     ];
-    const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 48, 60];
+    // Sizes are plain CSS px (matching the document's existing 12.5px body
+    // text convention) capped at 8-21 per spec: 21 is the intended maximum,
+    // heading-like size for this document's typography scale.
+    const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
     const COLOR_SWATCHES = [
       { label: 'Black', value: '#111111' },
       { label: 'Dark Blue', value: '#0B2E6D' },
@@ -1139,6 +1415,7 @@
       const [sizeOpen, setSizeOpen] = useState(false);
       const [colorOpen, setColorOpen] = useState(false);
       const [sizeInput, setSizeInput] = useState(12);
+      const [hexValue, setHexValue] = useState('#0B2E6D');
 
       // Prevents the browser's default mousedown action (which would shift
       // focus off the description field and collapse the text selection)
@@ -1149,9 +1426,18 @@
 
       const closeAllPopups = () => { setFontOpen(false); setSizeOpen(false); setColorOpen(false); };
 
+      const applyHex = () => {
+        let v = (hexValue || '').trim();
+        if (!v.startsWith('#')) v = '#' + v;
+        if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(v)) {
+          onColor(v);
+          setHexValue(v);
+        }
+      };
+
       const applySize = (v) => {
-        const n = Number(v);
-        if (n >= 6 && n <= 96) { onSize(n); closeAllPopups(); }
+        const n = Math.round(Number(v));
+        if (n >= 8 && n <= 21) { onSize(n); closeAllPopups(); }
       };
 
       return (
@@ -1197,8 +1483,8 @@
                     <input
                       type="number"
                       className="dt-num"
-                      min={6}
-                      max={96}
+                      min={8}
+                      max={21}
                       value={sizeInput}
                       onChange={(e) => setSizeInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') applySize(sizeInput); }}
@@ -1232,25 +1518,41 @@
               </button>
               {colorOpen && (
                 <div className="dt-color-popover">
-                  {COLOR_SWATCHES.map((c) => (
-                    <span
-                      key={c.value}
-                      className="dt-color-swatch"
-                      style={{ background: c.value }}
-                      title={c.label}
-                      onMouseDown={noSteal}
-                      onClick={() => { onColor(c.value); closeAllPopups(); }}
+                  <div className="dt-color-swatch-row" onMouseDown={noSteal}>
+                    {COLOR_SWATCHES.map((c) => (
+                      <span
+                        key={c.value}
+                        className="dt-color-swatch"
+                        style={{ background: c.value }}
+                        title={c.label}
+                        onClick={() => { onColor(c.value); closeAllPopups(); }}
+                      />
+                    ))}
+                  </div>
+                  <div className="dt-color-custom-row">
+                    {/* The native color input opens the OS's full picker
+                        (spectrum/wheel + hex, depending on platform) — it
+                        necessarily steals focus to do so.
+                        RichDescriptionEditor restores the saved text
+                        selection before applying the chosen color. */}
+                    <input
+                      type="color"
+                      className="dt-color-native"
+                      value={hexValue}
+                      onChange={(e) => { setHexValue(e.target.value); onColor(e.target.value); }}
+                      title="Custom color picker"
                     />
-                  ))}
-                  {/* The native color input necessarily steals focus to open its
-                      OS picker — RichDescriptionEditor restores the saved text
-                      selection before applying the chosen color. */}
-                  <input
-                    type="color"
-                    className="dt-color-native"
-                    onChange={(e) => { onColor(e.target.value); closeAllPopups(); }}
-                    title="Custom color"
-                  />
+                    <input
+                      type="text"
+                      className="dt-color-hex"
+                      value={hexValue}
+                      placeholder="#RRGGBB"
+                      onChange={(e) => setHexValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') applyHex(); }}
+                      onBlur={applyHex}
+                    />
+                  </div>
+                  <button type="button" className="dt-close-btn dt-color-apply" onClick={() => { applyHex(); closeAllPopups(); }}>Apply</button>
                 </div>
               )}
             </div>
@@ -1328,6 +1630,30 @@
       });
       const onSize = (px) => withSelection(() => {
         try {
+          const sel = window.getSelection();
+          if (sel && sel.rangeCount > 0 && sel.isCollapsed) {
+            // No text is selected yet (e.g. the field is still empty, or the
+            // user picked a size before typing). execCommand('fontSize') has
+            // no arbitrary-px form, so on a collapsed caret it can only mark
+            // the browser's internal "typing style" as legacy size 7
+            // (xxx-large, ~48px) with nothing yet in the DOM to fix up
+            // afterwards — any text then typed inherits that huge size
+            // regardless of which pt was picked. Instead, insert an empty
+            // span carrying the real px size and place the caret inside it,
+            // so subsequently typed text picks up the correct size directly.
+            const range = sel.getRangeAt(0);
+            const span = document.createElement('span');
+            span.style.fontSize = px + 'px';
+            span.appendChild(document.createTextNode('​'));
+            range.insertNode(span);
+            const newRange = document.createRange();
+            newRange.setStart(span.firstChild, 1);
+            newRange.setEnd(span.firstChild, 1);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            savedRangeRef.current = newRange.cloneRange();
+            return;
+          }
           // styleWithCSS must be OFF for this one command: with it on, Chrome
           // writes `font-size: xxx-large` (the CSS keyword for legacy size 7)
           // as inline CSS instead of a <font size="7"> element, so the
@@ -2124,8 +2450,8 @@ function ScopeOfWork() {
             const Icon = scopeIcons[step.icon];
             return (
               <li key={step.label.join(' ')} className={`flex flex-col items-center gap-[6px] px-[3px] py-[3px] text-center ${index !== 0 ? 'border-l border-navy/60' : ''}`}>
-                <span className="flex h-[44px] w-[44px] items-center justify-center rounded-full border-[2px] border-navy">
-                  <Icon className="h-[24px] w-[24px]" />
+                <span className="flex h-[44px] w-[44px] items-center justify-center rounded-full border-[2px] border-navy bg-navy/[0.04]">
+                  <Icon className="h-[22px] w-[22px]" />
                 </span>
                 <p className="text-[9.5px] font-semibold leading-[12px] text-navy">
                   {step.label.map((line) => <span key={line} className="block">{line}</span>)}
@@ -2148,7 +2474,8 @@ const DEFAULT_TABLE_SETTINGS = {
   showAmount: true,
   showRowDelete: true,
   showBorders: true,
-  compactRows: false
+  compactRows: false,
+  richTextEnabled: true
 };
 
 function getColumnWidths(ts) {
@@ -2166,24 +2493,101 @@ function getColumnWidths(ts) {
   return pct;
 }
 
+function stripHtmlToText(html) {
+  if (!html) return '';
+  if (!/[<&]/.test(html)) return html;
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent || '';
+}
+
 function rowHasContent(item) {
   const plainDesc = (item.description || '').replace(/<[^>]*>/g, '').trim();
   return !!(plainDesc || (item.unit || '').trim() || (item.qty || '').toString().trim() ||
     (item.rate || '').toString().trim() || (item.amount || '').toString().trim());
 }
 
-function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, onTotalChange }) {
-  const ts = tableSettings || DEFAULT_TABLE_SETTINGS;
-  const w = getColumnWidths(ts);
-  const cellPad = ts.compactRows ? 'py-[4px]' : 'py-[8px]';
-  const borderCls = ts.showBorders ? 'border border-navy' : 'border-0 border-b border-navy/15';
-
-  const confirmDelete = (item) => {
+const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canDelete, ts, borderCls, cellPad, defaults, onUpdateItem, onDuplicateRow, onMoveRow, onRemoveRow }) {
+  const handleDeleteClick = () => {
     if (rowHasContent(item)) {
       if (!window.confirm('This row has content. Delete it anyway?')) return;
     }
     onRemoveRow(item.id);
   };
+  return (
+    <tr className={`align-top ${item._justAdded ? 'row-adding' : ''}`}>
+      <td className="no-print" style={{ width: 30, verticalAlign: 'top' }}>
+        <div className="row-actions">
+          <button type="button" className="row-act-btn" title="Duplicate row" onClick={() => onDuplicateRow(item.id)}><IconDuplicate className="h-[11px] w-[11px]" /></button>
+          <button type="button" className="row-act-btn" title="Move up" disabled={isFirst} onClick={() => onMoveRow(item.id, -1)}><IconUp className="h-[11px] w-[11px]" /></button>
+          <button type="button" className="row-act-btn" title="Move down" disabled={isLast} onClick={() => onMoveRow(item.id, 1)}><IconDown className="h-[11px] w-[11px]" /></button>
+          {ts.showRowDelete && (
+            <button type="button" className="row-act-btn" title="Delete row" disabled={!canDelete} onClick={handleDeleteClick}><IconClose className="h-[12px] w-[12px]" /></button>
+          )}
+        </div>
+      </td>
+      {ts.showSerial && (
+        <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px]`}>{index + 1}</td>
+      )}
+      {ts.showDescription && (
+        <td className={`${borderCls} px-[8px] ${cellPad} text-[12.5px] leading-[18px]`}>
+          {ts.richTextEnabled !== false ? (
+            <RichDescriptionEditor
+              value={item.description}
+              onChange={(v) => onUpdateItem(item.id, 'description', v)}
+              placeholder="Enter description…"
+              defaultStyle={{
+                fontFamily: defaults.font,
+                fontSize: (defaults.size || 12.5) + 'px',
+                color: defaults.color,
+                textAlign: defaults.align
+              }}
+            />
+          ) : (
+            <EditLine
+              multiline
+              value={stripHtmlToText(item.description)}
+              onChange={(v) => onUpdateItem(item.id, 'description', v)}
+              placeholder="Enter description…"
+            />
+          )}
+        </td>
+      )}
+      {ts.showUnit && (
+        <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px] leading-[16px]`}>
+          <EditLine value={item.unit} onChange={(v) => onUpdateItem(item.id, 'unit', v)} />
+        </td>
+      )}
+      {ts.showQty && (
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.qty} onChange={(v) => onUpdateItem(item.id, 'qty', v)} />
+          </div>
+        </td>
+      )}
+      {ts.showRate && (
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.rate} onChange={(v) => onUpdateItem(item.id, 'rate', v)} />
+          </div>
+        </td>
+      )}
+      {ts.showAmount && (
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.amount} onChange={(v) => onUpdateItem(item.id, 'amount', v)} />
+          </div>
+        </td>
+      )}
+    </tr>
+  );
+});
+
+function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, onTotalChange }) {
+  const ts = tableSettings || DEFAULT_TABLE_SETTINGS;
+  const w = getColumnWidths(ts);
+  const cellPad = ts.compactRows ? 'py-[4px]' : 'py-[8px]';
+  const borderCls = ts.showBorders ? 'border border-navy' : 'border-0 border-b border-navy/15';
 
   return (
     <section className="mt-[12px] px-[20px]">
@@ -2202,62 +2606,22 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={item.id} className={`align-top ${item._justAdded ? 'row-adding' : ''}`}>
-              <td className="no-print" style={{ width: 30, verticalAlign: 'top' }}>
-                <div className="row-actions">
-                  <button type="button" className="row-act-btn" title="Duplicate row" onClick={() => onDuplicateRow(item.id)}><IconDuplicate className="h-[11px] w-[11px]" /></button>
-                  <button type="button" className="row-act-btn" title="Move up" disabled={index === 0} onClick={() => onMoveRow(item.id, -1)}><IconUp className="h-[11px] w-[11px]" /></button>
-                  <button type="button" className="row-act-btn" title="Move down" disabled={index === items.length - 1} onClick={() => onMoveRow(item.id, 1)}><IconDown className="h-[11px] w-[11px]" /></button>
-                  {ts.showRowDelete && (
-                    <button type="button" className="row-act-btn" title="Delete row" disabled={items.length <= 1} onClick={() => confirmDelete(item)}><IconClose className="h-[12px] w-[12px]" /></button>
-                  )}
-                </div>
-              </td>
-              {ts.showSerial && (
-                <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px]`}>{index + 1}</td>
-              )}
-              {ts.showDescription && (
-                <td className={`${borderCls} px-[8px] ${cellPad} text-[12.5px] leading-[18px]`}>
-                  <RichDescriptionEditor
-                    value={item.description}
-                    onChange={(v) => onUpdateItem(item.id, 'description', v)}
-                    placeholder="Enter description…"
-                    defaultStyle={{
-                      fontFamily: defaults.font,
-                      fontSize: (defaults.size || 12.5) + 'px',
-                      color: defaults.color,
-                      textAlign: defaults.align
-                    }}
-                  />
-                </td>
-              )}
-              {ts.showUnit && (
-                <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px] leading-[16px]`}>
-                  <EditLine value={item.unit} onChange={(v) => onUpdateItem(item.id, 'unit', v)} />
-                </td>
-              )}
-              {ts.showQty && (
-                <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-                  <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-                    <EditLine value={item.qty} onChange={(v) => onUpdateItem(item.id, 'qty', v)} />
-                  </div>
-                </td>
-              )}
-              {ts.showRate && (
-                <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-                  <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-                    <EditLine value={item.rate} onChange={(v) => onUpdateItem(item.id, 'rate', v)} />
-                  </div>
-                </td>
-              )}
-              {ts.showAmount && (
-                <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-                  <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-                    <EditLine value={item.amount} onChange={(v) => onUpdateItem(item.id, 'amount', v)} />
-                  </div>
-                </td>
-              )}
-            </tr>
+            <ItemRow
+              key={item.id}
+              item={item}
+              index={index}
+              isFirst={index === 0}
+              isLast={index === items.length - 1}
+              canDelete={items.length > 1}
+              ts={ts}
+              borderCls={borderCls}
+              cellPad={cellPad}
+              defaults={defaults}
+              onUpdateItem={onUpdateItem}
+              onDuplicateRow={onDuplicateRow}
+              onMoveRow={onMoveRow}
+              onRemoveRow={onRemoveRow}
+            />
           ))}
           <tr className="no-print">
             <td colSpan={1 + [ts.showSerial, ts.showDescription, ts.showUnit, ts.showQty, ts.showRate, ts.showAmount].filter(Boolean).length} className={`${borderCls} px-[8px] py-[6px]`}>
@@ -2269,7 +2633,7 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
             const labelSpan = visibleCount - 1;
             return (
               <tr>
-                <td className="no-print border-0" />
+                <td className="no-print border-0 bg-navy" />
                 {labelSpan > 0 && (
                   <th scope="row" colSpan={labelSpan} className={`${borderCls} bg-navy px-[8px] py-[6px] text-left text-[12px] font-semibold text-white`}>TOTAL AMOUNT</th>
                 )}
@@ -2389,14 +2753,49 @@ function FooterBar() {
   );
 }
 
-function TopAppBar({ docType, onBack, onSave }) {
+function relativeSavedText(ts) {
+  if (!ts) return 'Saved';
+  const sec = Math.floor((Date.now() - ts) / 1000);
+  if (sec < 5) return 'Saved just now';
+  if (sec < 60) return `Saved ${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `Saved ${min}m ago`;
+  return 'Saved';
+}
+
+function TopAppBar({ title, onBack, onSave, saveStatus, lastSavedAt }) {
+  // A tiny, transient status line under the title instead of a card that
+  // floats over the document — visible while actively saving, then fades
+  // out a couple of seconds after a save completes so it never lingers.
+  const [showSaved, setShowSaved] = useState(false);
+  useEffect(() => {
+    if (saveStatus === 'saved') {
+      setShowSaved(true);
+      const t = setTimeout(() => setShowSaved(false), 2500);
+      return () => clearTimeout(t);
+    }
+    setShowSaved(false);
+  }, [saveStatus, lastSavedAt]);
+
+  const [, forceTick] = useState(0);
+  useEffect(() => {
+    if (saveStatus !== 'saved' || !showSaved) return;
+    const id = setInterval(() => forceTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [saveStatus, showSaved]);
+
   return (
     <div className="app-bar no-print">
       <div className="app-bar-left">
         <button type="button" className="icon-btn ripple-surface" onClick={onBack} title="Back">
           <IconBack className="h-[20px] w-[20px]" />
         </button>
-        <div className="app-bar-title">{docType === 'bill' ? 'New Bill' : 'New Quotation'}</div>
+        <div>
+          <div className="app-bar-title">{title}</div>
+          {(saveStatus === 'saving' || showSaved) && (
+            <div className="app-bar-sub">{saveStatus === 'saving' ? 'Saving…' : relativeSavedText(lastSavedAt)}</div>
+          )}
+        </div>
       </div>
       <button type="button" className="app-bar-save ripple-surface" onClick={onSave} title="Save">
         <IconSave className="h-[16px] w-[16px]" />
@@ -2422,31 +2821,54 @@ function EditorToolbar({ onUndo, onRedo, canUndo, canRedo, onAddRow, onSave, onP
   );
 }
 
-function relativeSavedText(ts) {
-  if (!ts) return 'Saved ✓';
-  const sec = Math.floor((Date.now() - ts) / 1000);
-  if (sec < 5) return 'Saved just now';
-  if (sec < 60) return `Saved ${sec}s ago`;
-  const min = Math.floor(sec / 60);
-  if (min < 60) return `Saved ${min}m ago`;
-  return 'Saved ✓';
-}
+function LayoutSection({ id, editEnabled, layout, onMove, onMoveEnd, label, children }) {
+  const pos = layout[id] || { x: 0, y: 0 };
+  const dragRef = useRef(null);
+  const elRef = useRef(null);
 
-function SaveStatusBadge({ status, lastSavedAt }) {
-  const [, forceTick] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => forceTick((t) => t + 1), 15000);
-    return () => clearInterval(id);
-  }, []);
+  const onPointerDown = (e) => {
+    if (!editEnabled) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x || 0, origY: pos.y || 0 };
+    try { elRef.current.setPointerCapture(e.pointerId); } catch {}
+  };
+  const onPointerMove = (e) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+    onMove(id, { x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
+  };
+  const onPointerUp = () => {
+    if (!dragRef.current) return;
+    dragRef.current = null;
+    onMoveEnd();
+  };
+
+  const hasOffset = !!(pos.x || pos.y);
+
   return (
-    <div className={`save-status no-print ${status === 'saved' ? 'saved' : ''}`}>
-      <span className="dot" />
-      <span>{status === 'saving' ? 'Saving…' : relativeSavedText(lastSavedAt)}</span>
+    <div
+      ref={elRef}
+      className={editEnabled ? 'layout-editing' : ''}
+      style={{
+        position: 'relative',
+        transform: hasOffset ? `translate(${pos.x || 0}px, ${pos.y || 0}px)` : undefined,
+        zIndex: editEnabled ? 5 : undefined,
+        touchAction: editEnabled ? 'none' : undefined
+      }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+    >
+      {editEnabled && <div className="layout-drag-label no-print">{label} — drag to move</div>}
+      {children}
     </div>
   );
 }
 
-function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance, setAppearance, defaults, setDefaults, onResetAll }) {
+function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance, setAppearance, defaults, setDefaults, onResetAll, layoutEditEnabled, onToggleLayoutEdit, onResetLayout }) {
   if (!open) return null;
   const tableOptions = [
     ['showSerial', 'Serial Number'],
@@ -2470,20 +2892,25 @@ function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance
         </div>
         <div className="modal-body">
           <div className="settings-group">
-            <h4>Table Columns &amp; Layout</h4>
-            {tableOptions.map(([key, label]) => (
-              <div className="settings-row" key={key}>
-                <span>{label}</span>
-                <label className="switch">
-                  <input type="checkbox" checked={!!tableSettings[key]} onChange={(e) => onToggleTable(key, e.target.checked)} />
-                  <span className="slider" />
-                </label>
-              </div>
-            ))}
+            <h4>General</h4>
+            <div className="settings-row">
+              <span>Dark Editor (the printed PDF always stays light)</span>
+              <label className="switch">
+                <input type="checkbox" checked={!!appearance.dark} onChange={(e) => setAppearance((a) => ({ ...a, dark: e.target.checked }))} />
+                <span className="slider" />
+              </label>
+            </div>
           </div>
 
           <div className="settings-group">
-            <h4>Text Defaults (new descriptions)</h4>
+            <h4>Editor</h4>
+            <div className="settings-row">
+              <span>Rich Text Formatting</span>
+              <label className="switch">
+                <input type="checkbox" checked={tableSettings.richTextEnabled !== false} onChange={(e) => onToggleTable('richTextEnabled', e.target.checked)} />
+                <span className="slider" />
+              </label>
+            </div>
             <div className="settings-row">
               <span>Default Font</span>
               <select value={defaults.font} onChange={(e) => setDefaults((d) => ({ ...d, font: e.target.value }))}>
@@ -2511,19 +2938,58 @@ function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance
           </div>
 
           <div className="settings-group">
-            <h4>Appearance</h4>
-            <div className="settings-row">
-              <span>Dark Editor (the printed PDF always stays light)</span>
-              <label className="switch">
-                <input type="checkbox" checked={!!appearance.dark} onChange={(e) => setAppearance((a) => ({ ...a, dark: e.target.checked }))} />
-                <span className="slider" />
-              </label>
-            </div>
+            <h4>Table</h4>
+            {tableOptions.map(([key, label]) => (
+              <div className="settings-row" key={key}>
+                <span>{label}</span>
+                <label className="switch">
+                  <input type="checkbox" checked={!!tableSettings[key]} onChange={(e) => onToggleTable(key, e.target.checked)} />
+                  <span className="slider" />
+                </label>
+              </div>
+            ))}
           </div>
 
           <div className="settings-group">
-            <h4>Draft</h4>
-            <button type="button" className="upload-btn" style={{ color: '#D32F2F' }} onClick={onResetAll}>Clear Draft &amp; Start New</button>
+            <h4>PDF</h4>
+            <div className="settings-row">
+              <span>Page Size</span>
+              <span style={{ color: '#667085', fontSize: 12.5 }}>A4</span>
+            </div>
+            <div className="settings-row">
+              <span>Default Filename</span>
+              <select value={defaults.pdfFormat || 'number_client'} onChange={(e) => setDefaults((d) => ({ ...d, pdfFormat: e.target.value }))}>
+                <option value="number_client">Number + Client</option>
+                <option value="number">Quotation Number only</option>
+                <option value="client">Client Name only</option>
+              </select>
+            </div>
+            <p style={{ fontSize: 11.5, color: '#94a3b8', fontFamily: 'Montserrat, sans-serif', margin: '4px 0 0' }}>
+              You can always edit the exact filename before every download or share.
+            </p>
+          </div>
+
+          <div className="settings-group">
+            <h4>Layout Editor</h4>
+            <div className="settings-row">
+              <span>Enable Layout Edit Mode</span>
+              <label className="switch">
+                <input type="checkbox" checked={!!layoutEditEnabled} onChange={(e) => onToggleLayoutEdit(e.target.checked)} />
+                <span className="slider" />
+              </label>
+            </div>
+            <p style={{ fontSize: 11.5, color: '#94a3b8', fontFamily: 'Montserrat, sans-serif', margin: '4px 0 0' }}>
+              When on, drag any section of the quotation to reposition it. Positions save with this quotation and carry into the PDF.
+            </p>
+            <button type="button" className="upload-btn" style={{ marginTop: 8 }} onClick={onResetLayout}>Reset Layout</button>
+          </div>
+
+          <div className="settings-group">
+            <h4>This Quotation</h4>
+            <button type="button" className="upload-btn" style={{ color: '#D32F2F' }} onClick={onResetAll}>Clear &amp; Start Blank</button>
+            <p style={{ fontSize: 11.5, color: '#94a3b8', fontFamily: 'Montserrat, sans-serif', margin: '6px 0 0' }}>
+              Backup, restore, or delete all quotations from the Home screen (⚙ icon).
+            </p>
           </div>
         </div>
       </div>
@@ -2531,7 +2997,7 @@ function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance
   );
 }
 
-function App() {
+function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare }) {
   // All default fields are empty strings – no pre-filled data
   const defaultFields = {
     quotationNo: '',
@@ -2564,6 +3030,11 @@ function App() {
   const [pdfError, setPdfError] = useState('');
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
+  const [pdfPromptOpen, setPdfPromptOpen] = useState(false);
+  const [pdfPromptMode, setPdfPromptMode] = useState('download');
+  const [pdfNameDraft, setPdfNameDraft] = useState('');
+  const [layoutEditEnabled, setLayoutEditEnabled] = useState(false);
+  const [layout, setLayoutRaw] = useState({});
 
   const totalAutoRef = useRef(true);
   const pdfBlobRef = useRef(null);
@@ -2571,16 +3042,22 @@ function App() {
   const saveTimerRef = useRef(null);
   const settingsOpenRef = useRef(false);
   const stateRef = useRef(null);
+  const docCreatedAtRef = useRef(Date.now());
 
   useEffect(() => { settingsOpenRef.current = settingsOpen; }, [settingsOpen]);
-  useEffect(() => { stateRef.current = { fields, items, docType, images, tableSettings }; });
+  useEffect(() => { stateRef.current = { fields, items, docType, images, tableSettings, layout }; });
 
   /* ---------------- Undo / redo history ---------------- */
   const historyRef = useRef({ past: [], future: [] });
   const pendingBaselineRef = useRef(null);
   const debounceTimerRef = useRef(null);
 
-  const snapshotDoc = () => ({ fields, items, docType, images, tableSettings });
+  // Reads from stateRef (kept current by the effect above) rather than
+  // closing over fields/items/etc directly, so functions built on top of
+  // this (beginTypingEdit, commitDiscreteAction) stay correct even when
+  // called from a memoized/stale closure — they always see the latest
+  // document state, never a snapshot frozen at whatever render defined them.
+  const snapshotDoc = () => ({ ...stateRef.current });
 
   const applySnapshot = (snap) => {
     setFieldsRaw(snap.fields);
@@ -2669,8 +3146,38 @@ function App() {
     setTableSettingsRaw((prev) => ({ ...prev, [key]: val }));
   };
 
-  /* ---------------- Row management ---------------- */
-  const updateItem = (id, key, val) => {
+  /* ---------------- Layout Edit Mode (drag-to-reposition sections) ----------------
+     Positions persist with the document (and so carry into the PDF, which
+     captures the live DOM) but are intentionally kept out of the main
+     Undo/Redo history to keep dragging responsive — use "Reset Layout" to
+     undo a repositioning pass. */
+  const setLayoutPos = (id, pos) => {
+    setLayoutRaw((prev) => ({ ...prev, [id]: pos }));
+  };
+  // Takes the layout value explicitly (rather than reading the `layout`
+  // closure) so callers that just called setLayoutRaw synchronously — like
+  // resetLayout — persist the value they intended, not a stale pre-update
+  // snapshot from before React re-renders.
+  const persistLayout = (layoutValue) => {
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const doc = { fields, items, docType, images, tableSettings, layout: layoutValue, updatedAt: Date.now(), createdAt: docCreatedAtRef.current };
+      await idbSet(quotationDocKey(quotationId), doc);
+      await upsertIndexEntry(quotationId, doc);
+      setSaveStatus('saved');
+      setLastSavedAt(Date.now());
+    }, 400);
+  };
+  const handleLayoutMoveEnd = () => persistLayout(layout);
+  const resetLayout = () => { setLayoutRaw({}); persistLayout({}); };
+
+  /* ---------------- Row management ----------------
+     Wrapped in useCallback with empty deps so their identity is stable
+     across renders (they read state only via the functional setState form
+     or via stateRef, never by closing over fields/items directly) — this
+     lets ItemsTable's rows be memoized so editing one row of a 600-row
+     quotation doesn't re-render the other 599. */
+  const updateItem = useCallback((id, key, val) => {
     beginTypingEdit();
     setItemsRaw((prev) => prev.map((it) => {
       if (it.id !== id) return it;
@@ -2682,22 +3189,22 @@ function App() {
       }
       return next;
     }));
-  };
+  }, []);
 
-  const addRow = () => {
+  const addRow = useCallback(() => {
     commitDiscreteAction();
     setItemsRaw((prev) => {
       const nextId = prev.length ? Math.max(...prev.map((p) => p.id)) + 1 : 1;
       return [...prev, { id: nextId, description: '', unit: '', qty: '', rate: '', amount: '' }];
     });
-  };
+  }, []);
 
-  const removeRow = (id) => {
+  const removeRow = useCallback((id) => {
     commitDiscreteAction();
     setItemsRaw((prev) => (prev.length <= 1 ? prev : prev.filter((it) => it.id !== id)));
-  };
+  }, []);
 
-  const duplicateRow = (id) => {
+  const duplicateRow = useCallback((id) => {
     commitDiscreteAction();
     setItemsRaw((prev) => {
       const idx = prev.findIndex((it) => it.id === id);
@@ -2708,9 +3215,9 @@ function App() {
       next.splice(idx + 1, 0, copy);
       return next;
     });
-  };
+  }, []);
 
-  const moveRow = (id, dir) => {
+  const moveRow = useCallback((id, dir) => {
     commitDiscreteAction();
     setItemsRaw((prev) => {
       const idx = prev.findIndex((it) => it.id === id);
@@ -2721,29 +3228,25 @@ function App() {
       next.splice(newIdx, 0, moved);
       return next;
     });
-  };
+  }, []);
 
   const resetAll = async () => {
-    if (!window.confirm('Start a new blank quotation? This clears the current draft.')) return;
+    if (!window.confirm('Clear this quotation and start it blank again?')) return;
     commitDiscreteAction();
     setFieldsRaw({ ...defaultFields });
     setItemsRaw(defaultLineItems);
     setDocTypeRaw('quotation');
     setImagesRaw({ ...defaultImages });
     setTableSettingsRaw({ ...DEFAULT_TABLE_SETTINGS });
+    setLayoutRaw({});
     totalAutoRef.current = true;
-    await idbSet(DOC_KEY, {
+    const doc = {
       fields: defaultFields, items: defaultLineItems, docType: 'quotation',
-      images: defaultImages, tableSettings: DEFAULT_TABLE_SETTINGS, updatedAt: Date.now()
-    });
-    try {
-      localStorage.removeItem(STORAGE_FIELDS);
-      localStorage.removeItem(STORAGE_ITEMS);
-      localStorage.removeItem(STORAGE_DOCTYPE);
-      localStorage.removeItem(STORAGE_SIG);
-      localStorage.removeItem(STORAGE_STAMP);
-      localStorage.removeItem(STORAGE_LOGO);
-    } catch {}
+      images: defaultImages, tableSettings: DEFAULT_TABLE_SETTINGS, layout: {},
+      updatedAt: Date.now(), createdAt: docCreatedAtRef.current
+    };
+    await idbSet(quotationDocKey(quotationId), doc);
+    await upsertIndexEntry(quotationId, doc);
   };
 
   /* ---------------- Auto total (Qty × Rate sum, Indian formatting) ---------------- */
@@ -2754,44 +3257,50 @@ function App() {
     setFieldsRaw((prev) => (prev.total === formatted ? prev : { ...prev, total: formatted }));
   }, [items]);
 
-  /* ---------------- Load from IndexedDB (with localStorage migration) ---------------- */
+  /* ---------------- Load this quotation from IndexedDB ---------------- */
   useEffect(() => {
+    let cancelled = false;
+    setLoaded(false);
     (async () => {
-      let doc = await idbGet(DOC_KEY);
-      if (!doc) {
-        const lsFields = loadJSON(STORAGE_FIELDS, null);
-        const lsItems = loadJSON(STORAGE_ITEMS, null);
-        const lsDocType = loadJSON(STORAGE_DOCTYPE, null);
-        const lsLogo = loadJSON(STORAGE_LOGO, null);
-        const lsSig = loadJSON(STORAGE_SIG, null);
-        const lsStamp = loadJSON(STORAGE_STAMP, null);
-        if (lsFields || lsItems || lsDocType || lsLogo || lsSig || lsStamp) {
-          doc = {
-            fields: lsFields || defaultFields,
-            items: (lsItems && lsItems.length) ? lsItems : defaultLineItems,
-            docType: lsDocType || 'quotation',
-            images: { logo: lsLogo || null, signature: lsSig || null, stamp: lsStamp || null },
-            tableSettings: DEFAULT_TABLE_SETTINGS
-          };
-        }
-      }
+      const doc = await idbGet(quotationDocKey(quotationId));
+      if (cancelled) return;
+      docCreatedAtRef.current = (doc && doc.createdAt) || Date.now();
       if (doc) {
         setFieldsRaw({ ...defaultFields, ...doc.fields });
         setItemsRaw((doc.items && doc.items.length) ? doc.items : defaultLineItems);
         setDocTypeRaw(doc.docType || 'quotation');
         setImagesRaw({ ...defaultImages, ...(doc.images || {}) });
         setTableSettingsRaw({ ...DEFAULT_TABLE_SETTINGS, ...(doc.tableSettings || {}) });
-        if (doc.fields && doc.fields.total) totalAutoRef.current = true;
+        setLayoutRaw(doc.layout || {});
+        totalAutoRef.current = true;
+      } else {
+        setFieldsRaw({ ...defaultFields });
+        setItemsRaw(defaultLineItems);
+        setDocTypeRaw('quotation');
+        setImagesRaw({ ...defaultImages });
+        setTableSettingsRaw({ ...DEFAULT_TABLE_SETTINGS });
+        setLayoutRaw({});
       }
       const prefs = (await idbGet(PREFS_KEY)) || loadJSON(PREFS_KEY, null);
-      if (prefs) {
+      if (!cancelled && prefs) {
         if (prefs.defaults) setDefaultsRaw((d) => ({ ...d, ...prefs.defaults }));
         if (prefs.appearance) setAppearance((a) => ({ ...a, ...prefs.appearance }));
       }
-      setLoaded(true);
-      if (window.__hideSplashWhenReady) window.__hideSplashWhenReady();
+      historyRef.current = { past: [], future: [] };
+      pendingBaselineRef.current = null;
+      setCanUndo(false);
+      setCanRedo(false);
+      if (!cancelled) setLoaded(true);
     })();
-  }, []);
+    return () => { cancelled = true; };
+  }, [quotationId]);
+
+  useEffect(() => {
+    if (!loaded || !pendingShare) return;
+    onConsumePendingShare();
+    handleShare();
+    // eslint-disable-next-line
+  }, [loaded]);
 
   /* ---------------- Autosave (debounced) ---------------- */
   useEffect(() => {
@@ -2799,13 +3308,14 @@ function App() {
     setSaveStatus('saving');
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(async () => {
-      const doc = { fields, items, docType, images, tableSettings, updatedAt: Date.now() };
-      await idbSet(DOC_KEY, doc);
+      const doc = { fields, items, docType, images, tableSettings, layout, updatedAt: Date.now(), createdAt: docCreatedAtRef.current };
+      await idbSet(quotationDocKey(quotationId), doc);
+      await upsertIndexEntry(quotationId, doc);
       setSaveStatus('saved');
       setLastSavedAt(Date.now());
     }, 600);
     return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
-  }, [fields, items, docType, images, tableSettings, loaded]);
+  }, [fields, items, docType, images, tableSettings, loaded, quotationId]);
 
   useEffect(() => {
     if (!loaded) return;
@@ -2821,10 +3331,11 @@ function App() {
     if (saveTimerRef.current) { clearTimeout(saveTimerRef.current); saveTimerRef.current = null; }
     const s = stateRef.current;
     if (!s) return;
-    const doc = { ...s, updatedAt: Date.now() };
-    idbSet(DOC_KEY, doc);
+    const doc = { fields: s.fields, items: s.items, docType: s.docType, images: s.images, tableSettings: s.tableSettings, layout: s.layout, updatedAt: Date.now(), createdAt: docCreatedAtRef.current };
+    idbSet(quotationDocKey(quotationId), doc);
+    upsertIndexEntry(quotationId, doc);
     try {
-      localStorage.setItem(DOC_KEY + '_light', JSON.stringify({ fields: s.fields, docType: s.docType, updatedAt: Date.now() }));
+      localStorage.setItem(quotationDocKey(quotationId) + '_light', JSON.stringify({ fields: s.fields, docType: s.docType, updatedAt: Date.now() }));
     } catch {}
   };
 
@@ -2857,6 +3368,7 @@ function App() {
         return;
       }
       flushSaveNow();
+      onExitToHome();
     };
     window.addEventListener('popstate', onPop);
 
@@ -2881,7 +3393,7 @@ function App() {
 
   const handleBackTap = () => {
     flushSaveNow();
-    if (window.history.length > 1) window.history.back();
+    onExitToHome();
   };
 
   /* ---------------- PDF generation (multi-page) + Share ---------------- */
@@ -3074,15 +3586,20 @@ function App() {
     }
   };
 
-  const handleDownloadPdf = async () => {
+  const handleDownloadPdf = async (overrideName) => {
     const result = await generatePdf();
-    if (result) result.pdf.save(result.fileName);
+    if (result) {
+      const fname = overrideName || result.fileName;
+      pdfNameRef.current = fname;
+      result.pdf.save(fname);
+    }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (overrideName) => {
     if (!pdfBlobRef.current) await generatePdf();
     const blob = pdfBlobRef.current;
-    const fileName = pdfNameRef.current;
+    const fileName = overrideName || pdfNameRef.current;
+    if (overrideName) pdfNameRef.current = overrideName;
     if (!blob) return;
     try {
       const file = new File([blob], fileName, { type: 'application/pdf' });
@@ -3104,9 +3621,39 @@ function App() {
     setTimeout(() => URL.revokeObjectURL(url), 4000);
   };
 
+  const defaultPdfFileName = () => {
+    const fmt = defaults.pdfFormat || 'number_client';
+    const parts = [];
+    const wantNumber = fmt === 'number_client' || fmt === 'number';
+    const wantClient = fmt === 'number_client' || fmt === 'client';
+    if (wantNumber && fields.quotationNo) parts.push(('Quotation_' + fields.quotationNo).replace(/\s+/g, '_'));
+    if (wantClient && fields.clientName) parts.push(fields.clientName.trim().replace(/\s+/g, '_'));
+    if (!parts.length) parts.push(docType === 'bill' ? 'Bill' : 'Quotation');
+    return parts.join('_');
+  };
+
+  const openPdfPrompt = (mode) => {
+    setPdfPromptMode(mode);
+    setPdfNameDraft(defaultPdfFileName());
+    setPdfPromptOpen(true);
+  };
+
+  const confirmPdfPrompt = () => {
+    const name = (pdfNameDraft || defaultPdfFileName()).trim().replace(/\.pdf$/i, '') + '.pdf';
+    setPdfPromptOpen(false);
+    if (pdfPromptMode === 'share') handleShare(name);
+    else handleDownloadPdf(name);
+  };
+
   return (
     <>
-      <TopAppBar docType={docType} onBack={handleBackTap} onSave={handleSaveNow} />
+      <TopAppBar
+        title={docType === 'bill' ? 'New Bill' : 'New Quotation'}
+        onBack={handleBackTap}
+        onSave={handleSaveNow}
+        saveStatus={saveStatus}
+        lastSavedAt={lastSavedAt}
+      />
       <EditorToolbar
         onUndo={undo}
         onRedo={redo}
@@ -3114,12 +3661,39 @@ function App() {
         canRedo={canRedo}
         onAddRow={addRow}
         onSave={handleSaveNow}
-        onPdf={handleDownloadPdf}
-        onShare={handleShare}
+        onPdf={() => openPdfPrompt('download')}
+        onShare={() => openPdfPrompt('share')}
         onSettings={() => setSettingsOpen(true)}
         pdfBusy={pdfBusy}
       />
-      {saveStatus !== 'idle' && <SaveStatusBadge status={saveStatus} lastSavedAt={lastSavedAt} />}
+
+      {pdfPromptOpen && (
+        <div className="modal-overlay no-print" onClick={() => setPdfPromptOpen(false)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{pdfPromptMode === 'share' ? 'Share PDF' : 'Save PDF'}</h3>
+              <button type="button" className="icon-btn ripple-surface" onClick={() => setPdfPromptOpen(false)}><IconClose className="h-[18px] w-[18px]" /></button>
+            </div>
+            <div className="modal-body">
+              <label style={{ fontSize: 12, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>File name</label>
+              <input
+                type="text"
+                value={pdfNameDraft}
+                onChange={(e) => setPdfNameDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') confirmPdfPrompt(); }}
+                autoFocus
+                style={{ width: '100%', marginTop: 6, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 14, fontFamily: 'Montserrat, sans-serif', color: '#0B2E6D', boxSizing: 'border-box' }}
+              />
+              <div style={{ display: 'flex', gap: 14, marginTop: 16 }}>
+                <button type="button" className="upload-btn" onClick={confirmPdfPrompt} style={{ fontWeight: 700 }}>
+                  {pdfPromptMode === 'share' ? 'Share' : 'Download PDF'}
+                </button>
+                <button type="button" className="upload-btn" onClick={() => setPdfPromptOpen(false)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pdfError && (
         <div className="modal-overlay no-print" onClick={() => setPdfError('')}>
@@ -3149,35 +3723,50 @@ function App() {
         defaults={defaults}
         setDefaults={setDefaultsRaw}
         onResetAll={() => { setSettingsOpen(false); resetAll(); }}
+        layoutEditEnabled={layoutEditEnabled}
+        onToggleLayoutEdit={setLayoutEditEnabled}
+        onResetLayout={resetLayout}
       />
 
       <div className="sheet-wrap min-h-full w-full">
         <div className="sheet-scale">
           <main className="sheet flex flex-col overflow-hidden border border-navy/20 shadow-sheet">
-            <QuotationHeader fields={fields} setField={setField} docType={docType} setDocType={setDocType} logo={images.logo} setLogo={setLogo} />
-            <DetailsSection fields={fields} setField={setField} />
-            <ScopeOfWork />
-            <ItemsTable
-              items={items}
-              tableSettings={tableSettings}
-              defaults={defaults}
-              onUpdateItem={updateItem}
-              onAddRow={addRow}
-              onRemoveRow={removeRow}
-              onDuplicateRow={duplicateRow}
-              onMoveRow={moveRow}
-              total={fields.total}
-              onTotalChange={setTotalManual}
-            />
-            <TermsAndSignature
-              fields={fields}
-              setField={setField}
-              signature={images.signature}
-              setSignature={setSignature}
-              stamp={images.stamp}
-              setStamp={setStamp}
-            />
-            <FooterBar />
+            <LayoutSection id="header" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Header">
+              <QuotationHeader fields={fields} setField={setField} docType={docType} setDocType={setDocType} logo={images.logo} setLogo={setLogo} />
+            </LayoutSection>
+            <LayoutSection id="details" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Customer & Work Details">
+              <DetailsSection fields={fields} setField={setField} />
+            </LayoutSection>
+            <LayoutSection id="scope" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Scope of Work">
+              <ScopeOfWork />
+            </LayoutSection>
+            <LayoutSection id="table" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Items Table">
+              <ItemsTable
+                items={items}
+                tableSettings={tableSettings}
+                defaults={defaults}
+                onUpdateItem={updateItem}
+                onAddRow={addRow}
+                onRemoveRow={removeRow}
+                onDuplicateRow={duplicateRow}
+                onMoveRow={moveRow}
+                total={fields.total}
+                onTotalChange={setTotalManual}
+              />
+            </LayoutSection>
+            <LayoutSection id="terms" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Terms, Signature & Stamp">
+              <TermsAndSignature
+                fields={fields}
+                setField={setField}
+                signature={images.signature}
+                setSignature={setSignature}
+                stamp={images.stamp}
+                setStamp={setStamp}
+              />
+            </LayoutSection>
+            <LayoutSection id="footer" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Footer">
+              <FooterBar />
+            </LayoutSection>
           </main>
         </div>
       </div>
@@ -3185,7 +3774,286 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+function QuotationCard({ q, onOpen, onDuplicate, onDelete, onShare }) {
+  return (
+    <div className="qcard ripple-surface" onClick={() => onOpen(q.id)}>
+      <div className="qcard-top">
+        <div className="qcard-name">{q.name || 'Untitled Quotation'}</div>
+        <div className="qcard-badge">{q.docType === 'bill' ? 'BILL' : 'QUOTATION'}</div>
+      </div>
+      <div className="qcard-meta">
+        {q.quotationNo && <span>No. {q.quotationNo}</span>}
+        {q.clientName && <span>{q.clientName}</span>}
+        {q.date && <span>{q.date}</span>}
+      </div>
+      <div className="qcard-bottom">
+        <div className="qcard-total">{q.total ? `₹${q.total}` : ''}</div>
+        <div className="qcard-actions" onClick={(e) => e.stopPropagation()}>
+          <button type="button" className="qcard-act" title="Duplicate" onClick={() => onDuplicate(q.id)}><IconDuplicate className="h-[15px] w-[15px]" /></button>
+          <button type="button" className="qcard-act" title="Share PDF" onClick={() => onShare(q.id)}><IconShare className="h-[15px] w-[15px]" /></button>
+          <button type="button" className="qcard-act qcard-act-danger" title="Delete" onClick={() => onDelete(q.id)}><IconTrash className="h-[15px] w-[15px]" /></button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DataPanel({ open, onClose }) {
+  const [status, setStatus] = useState('');
+  if (!open) return null;
+
+  const handleBackup = async () => {
+    setStatus('Preparing backup…');
+    try {
+      const index = await loadQuotationIndex();
+      const docs = {};
+      for (const q of index) {
+        docs[q.id] = await idbGet(quotationDocKey(q.id));
+      }
+      const payload = { exportedAt: Date.now(), index, docs };
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      setStatus('Backup downloaded ✓');
+    } catch (e) {
+      setStatus('Backup failed. Please try again.');
+    }
+  };
+
+  const handleRestoreFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    setStatus('Restoring…');
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        if (!payload || !payload.docs) throw new Error('invalid file');
+        const existing = await loadQuotationIndex();
+        const byId = {};
+        existing.forEach((q) => { byId[q.id] = q; });
+        for (const id of Object.keys(payload.docs)) {
+          await idbSet(quotationDocKey(id), payload.docs[id]);
+          byId[id] = summarizeDoc(id, payload.docs[id]);
+        }
+        await saveQuotationIndex(Object.values(byId));
+        setStatus('Restore complete ✓ — go back to Home to see it.');
+      } catch (err) {
+        setStatus('That file could not be read as a backup.');
+      }
+    };
+    reader.onerror = () => setStatus('Could not read that file.');
+    reader.readAsText(file);
+  };
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Delete ALL quotations from this device? This cannot be undone.')) return;
+    const index = await loadQuotationIndex();
+    for (const q of index) await idbDelete(quotationDocKey(q.id));
+    await saveQuotationIndex([]);
+    setStatus('All quotations cleared.');
+  };
+
+  return (
+    <div className="modal-overlay no-print" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-sheet">
+        <div className="modal-header">
+          <h3>Backup &amp; Data</h3>
+          <button type="button" className="icon-btn ripple-surface" onClick={onClose} title="Close"><IconClose className="h-[18px] w-[18px]" /></button>
+        </div>
+        <div className="modal-body">
+          <div className="settings-group">
+            <h4>Backup</h4>
+            <p style={{ fontSize: 12.5, color: '#667085', fontFamily: 'Montserrat, sans-serif', margin: '0 0 10px' }}>
+              Download every saved quotation as a single JSON file you can keep safe or move to another device.
+            </p>
+            <button type="button" className="upload-btn" onClick={handleBackup}>Backup All Quotations</button>
+          </div>
+          <div className="settings-group">
+            <h4>Restore</h4>
+            <p style={{ fontSize: 12.5, color: '#667085', fontFamily: 'Montserrat, sans-serif', margin: '0 0 10px' }}>
+              Restore quotations from a backup file. Existing quotations with the same ID are overwritten; everything else is kept.
+            </p>
+            <label className="upload-btn" style={{ cursor: 'pointer' }}>
+              Choose Backup File…
+              <input type="file" accept="application/json" style={{ display: 'none' }} onChange={handleRestoreFile} />
+            </label>
+          </div>
+          <div className="settings-group">
+            <h4>Clear Data</h4>
+            <button type="button" className="upload-btn" style={{ color: '#D32F2F' }} onClick={handleClearAll}>Delete All Quotations</button>
+          </div>
+          {status && <p style={{ fontSize: 12.5, color: '#0B2E6D', fontWeight: 600, fontFamily: 'Montserrat, sans-serif' }}>{status}</p>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Home({ onOpen, onCreate, onShare }) {
+  const [index, setIndex] = useState(null);
+  const [search, setSearch] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [dataPanelOpen, setDataPanelOpen] = useState(false);
+
+  const refresh = async () => {
+    const list = await loadQuotationIndex();
+    list.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    setIndex(list);
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  const filtered = (index || []).filter((q) => {
+    const s = search.trim().toLowerCase();
+    if (!s) return true;
+    return (q.name || '').toLowerCase().includes(s) ||
+      (q.quotationNo || '').toLowerCase().includes(s) ||
+      (q.clientName || '').toLowerCase().includes(s);
+  });
+
+  const handleCreate = async () => {
+    const id = await createNewQuotation();
+    onCreate(id);
+  };
+
+  const handleDuplicate = async (id) => {
+    await duplicateQuotationRecord(id);
+    await refresh();
+  };
+
+  const handleDeleteConfirmed = async () => {
+    if (!deleteTarget) return;
+    await deleteQuotationRecord(deleteTarget);
+    setDeleteTarget(null);
+    await refresh();
+  };
+
+  return (
+    <div className="home-screen">
+      <div className="home-header">
+        <div>
+          <div className="home-title">QUOTATION APP</div>
+          <div className="home-subtitle">Professional Quotation &amp; Bill Maker</div>
+        </div>
+        <button type="button" className="icon-btn ripple-surface" title="Backup &amp; Data" onClick={() => setDataPanelOpen(true)} style={{ color: '#fff' }}>
+          <IconSettingsGear className="h-[20px] w-[20px]" />
+        </button>
+      </div>
+
+      <div className="home-search-wrap">
+        <div className="home-search">
+          <IconSvg d="m21 21-4.3-4.3M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z" className="h-[16px] w-[16px] text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by name, number or client…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="home-create-wrap">
+        <button type="button" className="home-create-btn ripple-surface" onClick={handleCreate}>
+          <IconAddRow className="h-[18px] w-[18px]" />
+          Create New Quotation
+        </button>
+      </div>
+
+      <div className="home-section-label">
+        {search.trim() ? `Results (${filtered.length})` : `Your Quotations (${filtered.length})`}
+      </div>
+
+      {index === null ? (
+        <div className="home-empty">Loading…</div>
+      ) : filtered.length === 0 ? (
+        <div className="home-empty">
+          <div className="home-empty-icon">📄</div>
+          {search.trim() ? 'No quotations match your search.' : 'No quotations yet. Tap "Create New Quotation" to get started.'}
+        </div>
+      ) : (
+        <div className="home-card-list">
+          {filtered.map((q) => (
+            <QuotationCard
+              key={q.id}
+              q={q}
+              onOpen={onOpen}
+              onDuplicate={handleDuplicate}
+              onDelete={(id) => setDeleteTarget(id)}
+              onShare={onShare}
+            />
+          ))}
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="modal-overlay no-print" onClick={() => setDeleteTarget(null)}>
+          <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 340 }}>
+            <div className="modal-header">
+              <h3>Delete this quotation?</h3>
+            </div>
+            <div className="modal-body">
+              <p style={{ fontSize: 13, color: '#333', fontFamily: 'Montserrat, sans-serif', margin: '0 0 16px' }}>
+                This can't be undone.
+              </p>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button type="button" className="upload-btn" style={{ color: '#D32F2F', fontWeight: 700 }} onClick={handleDeleteConfirmed}>Delete</button>
+                <button type="button" className="upload-btn" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <DataPanel open={dataPanelOpen} onClose={() => setDataPanelOpen(false)} />
+    </div>
+  );
+}
+
+function Root() {
+  const [ready, setReady] = useState(false);
+  const [screen, setScreen] = useState('home');
+  const [activeId, setActiveId] = useState(null);
+  const [pendingShare, setPendingShare] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      await migrateLegacyDraftIfNeeded();
+      setReady(true);
+      if (window.__hideSplashWhenReady) window.__hideSplashWhenReady();
+    })();
+  }, []);
+
+  const goHome = () => { setScreen('home'); setActiveId(null); setPendingShare(false); };
+  const openQuotation = (id) => { setActiveId(id); setPendingShare(false); setScreen('editor'); };
+  const createQuotation = (id) => { setActiveId(id); setPendingShare(false); setScreen('editor'); };
+  const shareQuotation = (id) => { setActiveId(id); setPendingShare(true); setScreen('editor'); };
+
+  if (!ready) return null;
+
+  if (screen === 'editor' && activeId) {
+    return (
+      <Editor
+        key={activeId}
+        quotationId={activeId}
+        onExitToHome={goHome}
+        pendingShare={pendingShare}
+        onConsumePendingShare={() => setPendingShare(false)}
+      />
+    );
+  }
+
+  return <Home onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
   </script>
 </body>
 </html>
