@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Waterproofing Specialist Quotation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { DEFAULT: '#0B2E6D', dark: '#082250' },
+            brandblue: { DEFAULT: '#1A56C4', light: '#2E6BE0' }
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+            script: ['"Dancing Script"', 'cursive']
+          },
+          boxShadow: {
+            sheet: '0 10px 36px rgba(11, 46, 109, 0.18)'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: #e9edf5;
+      margin: 0;
+      font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
+    }
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+    @media screen and (max-width: 820px) {
+      .sheet-scale {
+        transform: scale(calc((100vw - 24px) / 794));
+        transform-origin: top center;
+      }
+    }
+    .tab-clip {
+      clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 100%, 0 100%);
+    }
+    .quote-clip {
+      clip-path: polygon(16% 0, 100% 0, 100% 100%, 27% 100%, 0 56%);
+    }
+    .thanks-clip {
+      clip-path: polygon(9% 0, 100% 0, 100% 100%, 0 100%);
+    }
+
+    .edit-line {
+      display: block;
+      width: 100%;
+      border: none;
+      border-bottom: 1.5px solid #0B2E6D;
+      background: transparent;
+      outline: none;
+      font-family: Montserrat, ui-sans-serif, system-ui, sans-serif;
+      font-size: 12.5px;
+      line-height: 18px;
+      color: #0B2E6D;
+      padding: 2px 4px 4px 4px;
+      margin: 0;
+      min-height: 22px;
+      box-sizing: border-box;
+      vertical-align: bottom;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+    .edit-line.white-line {
+      border-bottom-color: #ffffff;
+      color: #ffffff;
+    }
+    .edit-line:focus {
+      border-bottom-color: #1A56C4;
+      background: rgba(26, 86, 196, 0.04);
+    }
+    .edit-line.white-line:focus {
+      border-bottom-color: #a0c4ff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    textarea.edit-line {
+      resize: none;
+      overflow-y: auto;
+      overflow-x: hidden;
+      border-bottom: 1.5px solid #0B2E6D;
+      height: auto;
+      min-height: 22px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      padding-bottom: 6px;
+    }
+    td .edit-line,
+    td textarea.edit-line {
+      max-width: 100%;
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
+    .img-box {
+      position: relative;
+      overflow: hidden;
+    }
+    .placed-img {
+      position: absolute;
+      cursor: move;
+      user-select: none;
+      -webkit-user-drag: none;
+      max-width: none;
+      max-height: none;
+    }
+    .placed-img.selected {
+      outline: 1px dashed #1A56C4;
+    }
+    .resize-handle {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: #1A56C4;
+      border: 1px solid #fff;
+      z-index: 5;
+    }
+    .resize-handle.br {
+      right: -5px;
+      bottom: -5px;
+      cursor: se-resize;
+    }
+    .resize-handle.bl {
+      left: -5px;
+      bottom: -5px;
+      cursor: sw-resize;
+    }
+    .resize-handle.tr {
+      right: -5px;
+      top: -5px;
+      cursor: ne-resize;
+    }
+    .resize-handle.tl {
+      left: -5px;
+      top: -5px;
+      cursor: nw-resize;
+    }
+
+    .upload-btn {
+      font-size: 10px;
+      color: #1A56C4;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: underline;
+      font-family: inherit;
+    }
+    .upload-btn:hover {
+      color: #0B2E6D;
+    }
+
+    .img-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .crop-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .crop-panel {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px;
+      max-width: 90vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+    .crop-canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      max-width: 70vw;
+      max-height: 60vh;
+      background: #f0f0f0;
+      cursor: crosshair;
+    }
+    .crop-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .crop-actions button {
+      padding: 6px 14px;
+      border-radius: 4px;
+      border: 1px solid #0B2E6D;
+      font-family: Montserrat, sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .crop-actions .btn-cancel {
+      background: #fff;
+      color: #0B2E6D;
+    }
+    .crop-actions .btn-apply {
+      background: #0B2E6D;
+      color: #fff;
+    }
+
+    .toolbar {
+      position: fixed;
+      bottom: 16px;
+      right: 16px;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
+    }
+    .toolbar button {
+      background: #0B2E6D;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-family: Montserrat, sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(11, 46, 109, 0.35);
+    }
+    .toolbar button:hover {
+      background: #082250;
+    }
+    .toolbar button:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+    body.pdf-exporting .toolbar,
+    body.pdf-exporting #btn-pdf,
+    body.pdf-exporting #btn-clear-storage,
+    body.pdf-exporting .upload-btn,
+    body.pdf-exporting .img-controls,
+    body.pdf-exporting .resize-handle,
+    body.pdf-exporting .no-print {
+      display: none !important;
+      visibility: hidden !important;
+    }
+    body.pdf-exporting .placed-img {
+      outline: none !important;
+    }
+    body.pdf-exporting .edit-line {
+      background: transparent !important;
+      border-bottom: 1.5px solid #0B2E6D !important;
+    }
+    body.pdf-exporting .edit-line.white-line {
+      border-bottom: 1.5px solid #ffffff !important;
+      color: #ffffff !important;
+    }
+    body.pdf-exporting .sheet,
+    body.pdf-exporting .sheet *,
+    body.pdf-exporting header,
+    body.pdf-exporting main {
+      overflow: visible !important;
+    }
+    body.pdf-exporting h1 {
+      overflow: visible !important;
+      text-overflow: clip !important;
+      white-space: normal !important;
+    }
+
+    @media print {
+      @page {
+        size: A4;
+        margin: 0;
+      }
+      body {
+        background: #ffffff;
+      }
+      .sheet-wrap {
+        padding: 0;
+      }
+      .sheet {
+        box-shadow: none;
+        border: 0;
+      }
+      .sheet-scale {
+        transform: none !important;
+      }
+      .toolbar,
+      .upload-btn,
+      .img-controls,
+      .resize-handle,
+      .crop-overlay,
+      .no-print {
+        display: none !important;
+      }
+      .placed-img {
+        outline: none !important;
+      }
+      .edit-line {
+        color: #0B2E6D !important;
+        background: transparent !important;
+        border-bottom: 1.5px solid #0B2E6D !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .edit-line.white-line {
+        color: #ffffff !important;
+        background: transparent !important;
+        border-bottom: 1.5px solid #ffffff !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar no-print">
+    <button type="button" id="btn-pdf">Download PDF</button>
+    <button type="button" id="btn-clear-storage">Reset Saved</button>
+  </div>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js">
+  </script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js">
+  </script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+  </script>
+
+  <script type="text/babel">
+    const { useState, useRef, useEffect, useCallback } = React;
+
+    // Full company name
+    const company = {
+      name: 'SHAIK SADIQ ALI ANWAR',
+      tagline: 'WATERPROOFING SPECIALIST',
+      phone: '+91 9182650939',
+      email: 'sadiqshaik3233@gmail.com',
+      address: ['Plot No. 33, Shivaji Nagar', 'Nagar Govindi Shivaji Nagar,', 'Mumbai, Maharashtra']
+    };
+
+    const customerFields = [
+      { label: 'Client Name', lines: 1, key: 'clientName' },
+      { label: 'Site Address', lines: 2, key: 'siteAddress' },
+      { label: 'Contact No.', lines: 1, key: 'contactNo' },
+      { label: 'Email ID', lines: 1, key: 'emailId' }
+    ];
+
+    const scopeOfWork = [
+      { icon: 'magnifier', label: ['Site', 'Inspection'] },
+      { icon: 'hammer-drill', label: ['Crack Marking', '& Drilling'] },
+      { icon: 'injection-packer', label: ['Injection Packer', 'Installation'] },
+      { icon: 'syringe', label: ['PU / Epoxy', 'Chemical Injection', 'Grouting'] },
+      { icon: 'shield-drop', label: ['Leakage', 'Sealing'] },
+      { icon: 'wrench', label: ['Packer', 'Removal'] },
+      { icon: 'sparkles', label: ['Surface Finishing', '& Cleaning'] }
+    ];
+
+    // Default line items: one empty row
+    const defaultLineItems = [{
+      id: 1,
+      description: '',
+      unit: '',
+      qty: '',
+      rate: '',
+      amount: ''
+    }];
+
+    // Removed the 4th term (Quotation Validity)
+    const terms = [
+      'Material and labour charges are included unless mentioned otherwise.',
+      'Additional work, if required, will be charged separately.',
+      'Payment Terms:  50% Advance and 50% on completion of work.',
+      'Warranty:  As per site condition and agreed work scope.',
+      'This quotation is prepared based on the current site condition. Any variation may affect the final cost.'
+    ];
+
+    const footerBadges = [
+      { icon: 'water-drop', label: 'QUALITY WORK' },
+      { icon: 'handshake', label: 'TIMELY SERVICE' },
+      { icon: 'shield-check', label: 'LONG LASTING PROTECTION' }
+    ];
+
+    const STORAGE_FIELDS = 'quotation_fields_v1';
+    const STORAGE_ITEMS = 'quotation_items_v1';
+    const STORAGE_DOCTYPE = 'quotation_doctype_v1';
+    const STORAGE_SIG = 'quotation_sig_v1';
+    const STORAGE_STAMP = 'quotation_stamp_v1';
+    const STORAGE_LOGO = 'quotation_logo_v1';
+
+    function loadJSON(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+      } catch { return fallback; }
+    }
+
+    function saveJSON(key, val) {
+      try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+    }
+
+    function EditLine({ value, onChange, className = '', placeholder = '', multiline = false, white = false }) {
+      const cls = `edit-line ${white ? 'white-line' : ''} ${className}`;
+      const taRef = useRef(null);
+
+      useEffect(() => {
+        if (multiline && taRef.current) {
+          const el = taRef.current;
+          el.style.height = 'auto';
+          el.style.height = Math.max(20, el.scrollHeight) + 'px';
+        }
+      }, [value, multiline]);
+
+      if (multiline) {
+        return (
+          <textarea
+          ref={taRef}
+          className={cls}
+          value={value || ''}
+          onChange={(e) => {
+            onChange(e.target.value);
+            const el = e.target;
+            el.style.height = 'auto';
+            el.style.height = Math.max(20, el.scrollHeight) + 'px';
+          }}
+          rows={1}
+          placeholder={placeholder}
+          style={{ width: '100%' }}
+          />
+        );
+      }
+      return (
+        <input
+        type="text"
+        className={cls}
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        />
+      );
+    }
+
+    function CropModal({ src, onApply, onCancel }) {
+      const canvasRef = useRef(null);
+      const imgRef = useRef(null);
+      const [sel, setSel] = useState(null);
+      const dragRef = useRef(null);
+
+      useEffect(() => {
+        const img = new Image();
+        img.onload = () => {
+          imgRef.current = img;
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          const maxW = Math.min(window.innerWidth * 0.7, 600);
+          const maxH = Math.min(window.innerHeight * 0.55, 450);
+          let w = img.width,
+            h = img.height;
+          const scale = Math.min(maxW / w, maxH / h, 1);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, w, h);
+          ctx.drawImage(img, 0, 0, w, h);
+          setSel({ x: 0, y: 0, w, h });
+        };
+        img.src = src;
+      }, [src]);
+
+      const drawOverlay = useCallback(() => {
+        const canvas = canvasRef.current;
+        const img = imgRef.current;
+        if (!canvas || !img || !sel) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(0,0,0,0.45)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(sel.x, sel.y, sel.w, sel.h);
+        ctx.drawImage(img, sel.x * (img.width / canvas.width), sel.y * (img.height / canvas.height),
+          sel.w * (img.width / canvas.width), sel.h * (img.height / canvas.height),
+          sel.x, sel.y, sel.w, sel.h);
+        ctx.strokeStyle = '#1A56C4';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sel.x, sel.y, sel.w, sel.h);
+      }, [sel]);
+
+      useEffect(() => { drawOverlay(); }, [drawOverlay]);
+
+      const onPointerDown = (e) => {
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        dragRef.current = { startX: x, startY: y, mode: 'new' };
+        setSel({ x, y, w: 0, h: 0 });
+      };
+      const onPointerMove = (e) => {
+        if (!dragRef.current) return;
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.max(0, Math.min(canvas.width, e.clientX - rect.left));
+        const y = Math.max(0, Math.min(canvas.height, e.clientY - rect.top));
+        const { startX, startY } = dragRef.current;
+        const nx = Math.min(startX, x);
+        const ny = Math.min(startY, y);
+        const nw = Math.abs(x - startX);
+        const nh = Math.abs(y - startY);
+        setSel({ x: nx, y: ny, w: nw, h: nh });
+      };
+      const onPointerUp = () => { dragRef.current = null; };
+
+      const applyCrop = () => {
+        const canvas = canvasRef.current;
+        const img = imgRef.current;
+        if (!canvas || !img || !sel || sel.w < 4 || sel.h < 4) {
+          onApply(src);
+          return;
+        }
+        const scaleX = img.width / canvas.width;
+        const scaleY = img.height / canvas.height;
+        const out = document.createElement('canvas');
+        out.width = Math.round(sel.w * scaleX);
+        out.height = Math.round(sel.h * scaleY);
+        const ctx = out.getContext('2d');
+        ctx.drawImage(img, sel.x * scaleX, sel.y * scaleY, sel.w * scaleX, sel.h * scaleY, 0, 0, out.width, out
+          .height);
+        onApply(out.toDataURL('image/png'));
+      };
+
+      return (
+        <div className="crop-overlay" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+          <div className="crop-panel">
+            <div style={{ fontWeight: 700, color: '#0B2E6D', fontSize: 14 }}>Crop Image — drag to select area</div>
+            <div className="crop-canvas-wrap">
+              <canvas
+              ref={canvasRef}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerLeave={onPointerUp}
+              style={{ display: 'block', maxWidth: '100%' }}
+              />
+            </div>
+            <div className="crop-actions">
+              <button type="button" className="btn-cancel" onClick={onCancel}>Cancel</button>
+              <button type="button" className="btn-apply" onClick={applyCrop}>Apply Crop</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function PlacedImage({ data, onChange, onDelete, boxRef }) {
+      const [selected, setSelected] = useState(false);
+      const dragState = useRef(null);
+
+      const clamp = (pos) => {
+        const box = boxRef.current;
+        if (!box) return pos;
+        const bw = box.clientWidth;
+        const bh = box.clientHeight;
+        let { x, y, w, h } = pos;
+        w = Math.max(24, Math.min(w, bw));
+        h = Math.max(24, Math.min(h, bh));
+        x = Math.max(0, Math.min(x, bw - w));
+        y = Math.max(0, Math.min(y, bh - h));
+        return { ...pos, x, y, w, h };
+      };
+
+      const onMoveStart = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelected(true);
+        dragState.current = {
+          mode: 'move',
+          startX: e.clientX,
+          startY: e.clientY,
+          origX: data.x,
+          origY: data.y
+        };
+      };
+
+      const onResizeStart = (e, corner) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setSelected(true);
+        dragState.current = {
+          mode: 'resize',
+          corner,
+          startX: e.clientX,
+          startY: e.clientY,
+          orig: { ...data }
+        };
+      };
+
+      useEffect(() => {
+        const onMove = (e) => {
+          if (!dragState.current) return;
+          const st = dragState.current;
+          if (st.mode === 'move') {
+            const dx = e.clientX - st.startX;
+            const dy = e.clientY - st.startY;
+            onChange(clamp({ ...data, x: st.origX + dx, y: st.origY + dy }));
+          } else if (st.mode === 'resize') {
+            const dx = e.clientX - st.startX;
+            const dy = e.clientY - st.startY;
+            const o = st.orig;
+            const ratio = o.w / o.h;
+            let nw = o.w,
+              nh = o.h,
+              nx = o.x,
+              ny = o.y;
+            if (st.corner === 'br') {
+              nw = o.w + dx;
+              nh = nw / ratio;
+            } else if (st.corner === 'bl') {
+              nw = o.w - dx;
+              nh = nw / ratio;
+              nx = o.x + (o.w - nw);
+            } else if (st.corner === 'tr') {
+              nw = o.w + dx;
+              nh = nw / ratio;
+              ny = o.y + (o.h - nh);
+            } else if (st.corner === 'tl') {
+              nw = o.w - dx;
+              nh = nw / ratio;
+              nx = o.x + (o.w - nw);
+              ny = o.y + (o.h - nh);
+            }
+            onChange(clamp({ ...data, x: nx, y: ny, w: nw, h: nh }));
+          }
+        };
+        const onUp = () => { dragState.current = null; };
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        return () => {
+          window.removeEventListener('pointermove', onMove);
+          window.removeEventListener('pointerup', onUp);
+        };
+      });
+
+      useEffect(() => {
+        const onDocClick = (e) => {
+          if (boxRef.current && !boxRef.current.contains(e.target)) setSelected(false);
+        };
+        document.addEventListener('click', onDocClick);
+        return () => document.removeEventListener('click', onDocClick);
+      }, [boxRef]);
+
+      return (
+        <div
+        className={`placed-img ${selected ? 'selected' : ''}`}
+        style={{ left: data.x, top: data.y, width: data.w, height: data.h }}
+        onPointerDown={onMoveStart}
+        >
+        <img
+        src={data.src}
+        alt=""
+        draggable={false}
+        style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none', display: 'block' }}
+        />
+        {selected && (
+          <>
+          <div className="resize-handle tl" onPointerDown={(e) => onResizeStart(e, 'tl')} />
+          <div className="resize-handle tr" onPointerDown={(e) => onResizeStart(e, 'tr')} />
+          <div className="resize-handle bl" onPointerDown={(e) => onResizeStart(e, 'bl')} />
+          <div className="resize-handle br" onPointerDown={(e) => onResizeStart(e, 'br')} />
+          </>
+        )}
+      </div>
+    );
+  }
+
+  function ImageZone({ storageKey, defaultW, defaultH, children, label }) {
+    const boxRef = useRef(null);
+    const fileRef = useRef(null);
+    const [imgData, setImgData] = useState(() => loadJSON(storageKey, null));
+    const [cropSrc, setCropSrc] = useState(null);
+
+    useEffect(() => {
+      if (imgData) saveJSON(storageKey, imgData);
+      else localStorage.removeItem(storageKey);
+    }, [imgData, storageKey]);
+
+    const onFile = (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => setCropSrc(reader.result);
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    };
+
+    const onCropApply = (dataUrl) => {
+      setCropSrc(null);
+      const box = boxRef.current;
+      const bw = box ? box.clientWidth : defaultW;
+      const bh = box ? box.clientHeight : defaultH;
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.width / img.height;
+        let w = Math.min(bw * 0.85, img.width);
+        let h = w / ratio;
+        if (h > bh * 0.85) {
+          h = bh * 0.85;
+          w = h * ratio;
+        }
+        setImgData({
+          src: dataUrl,
+          x: (bw - w) / 2,
+          y: (bh - h) / 2,
+          w,
+          h
+        });
+      };
+      img.src = dataUrl;
+    };
+
+    return (
+      <div>
+        <div
+        ref={boxRef}
+        className="img-box"
+        style={{ width: '100%', height: defaultH, position: 'relative' }}
+        >
+        {!imgData && children}
+        {imgData && (
+          <PlacedImage
+          data={imgData}
+          onChange={setImgData}
+          boxRef={boxRef}
+          />
+        )}
+      </div>
+      <div className="img-controls no-print">
+        <button type="button" className="upload-btn" onClick={() => fileRef.current && fileRef.current.click()}>
+          {imgData ? `Replace ${label}` : `Upload ${label}`}
+        </button>
+        {imgData && (
+          <button type="button" className="upload-btn" onClick={() => setImgData(null)}>
+            Delete {label}
+          </button>
+        )}
+      </div>
+      <input
+      ref={fileRef}
+      type="file"
+      accept="image/png,image/jpeg,image/webp,image/*"
+      style={{ display: 'none' }}
+      onChange={onFile}
+      />
+      {cropSrc && (
+        <CropModal
+        src={cropSrc}
+        onApply={onCropApply}
+        onCancel={() => setCropSrc(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function PhoneSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-[11px] w-[11px]">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+    </svg>
+  );
+}
+
+function MailSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-[11px] w-[11px]">
+      <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </svg>
+  );
+}
+
+function MapPinSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-[11px] w-[11px]">
+      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+    </svg>
+  );
+}
+
+function UserSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+    </svg>
+  );
+}
+
+function ClipboardSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+    </svg>
+  );
+}
+
+function SettingsSvg() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="h-full w-full">
+      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+    </svg>
+  );
+}
+
+function ClipboardListSvg({ className = 'h-[20px] w-[20px]' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/>
+    </svg>
+  );
+}
+
+function StampSvg({ className = '' }) {
+  return (
+    <svg viewBox="0 0 200 200" role="img" aria-label="Sadiq Ali Anwar Waterproofing Specialist stamp" className={className}>
+      <circle cx="100" cy="100" r="96" fill="none" stroke="#0B2E6D" strokeWidth="5" />
+      <circle cx="100" cy="100" r="86" fill="none" stroke="#0B2E6D" strokeWidth="2" />
+      <defs>
+        <path id="topArc" d="M 30,105 A 70,70 0 0,1 170,105" fill="none" />
+      </defs>
+      <text fill="#0B2E6D" fontSize="15" fontWeight="700" letterSpacing="2.2" fontFamily="Montserrat, sans-serif">
+        <textPath href="#topArc" startOffset="50%" textAnchor="middle">SADIQ ALI ANWAR</textPath>
+      </text>
+      <line x1="40" y1="92" x2="160" y2="92" stroke="#0B2E6D" strokeWidth="2" />
+      <text x="100" y="112" textAnchor="middle" fill="#0B2E6D" fontSize="15.5" fontWeight="800" fontFamily="Montserrat, sans-serif" letterSpacing="0.8">WATERPROOFING</text>
+      <text x="100" y="132" textAnchor="middle" fill="#0B2E6D" fontSize="15.5" fontWeight="800" fontFamily="Montserrat, sans-serif" letterSpacing="0.8">SPECIALIST</text>
+      <line x1="48" y1="144" x2="152" y2="144" stroke="#0B2E6D" strokeWidth="2" />
+      <path d="M100 152l4.2 8.5 9.4 1.4-6.8 6.6 1.6 9.4-8.4-4.4-8.4 4.4 1.6-9.4-6.8-6.6 9.4-1.4Z" fill="#0B2E6D" />
+    </svg>
+  );
+}
+
+const NAVY = '#0B2E6D';
+
+function SvgIcon({ children, className, fill = NAVY }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false" className={className} fill={fill}>
+      {children}
+    </svg>
+  );
+}
+
+function MagnifierIcon({ className }) {
+  return (<SvgIcon className={className}><path d="M28 8a20 20 0 1 0 12.2 35.85l12.5 12.5a3.5 3.5 0 0 0 4.95-4.95l-12.5-12.5A20 20 0 0 0 28 8Zm0 6a14 14 0 1 1 0 28 14 14 0 0 1 0-28Z" /></SvgIcon>);
+}
+
+function HammerDrillIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <path d="M10 16h26a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V20a4 4 0 0 1 4-4Z" />
+      <path d="M40 21h8v8h-8z" /><path d="M48 23.5h12v3H48z" /><path d="M56 22l4 3-4 3z" />
+      <path d="M14 34h9l-2 20a3.5 3.5 0 0 1-7 0Z" /><path d="M6 22h-3a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3h3Z" /><path d="M23 34h5v5h-5z" />
+    </SvgIcon>
+  );
+}
+
+function InjectionPackerIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <path d="M26 6h12v7H26z" /><path d="M23 13h18v6H23z" /><path d="M28 19h8v22h-8z" />
+      <path d="M24 22h16v3H24z" /><path d="M24 28h16v3H24z" /><path d="M24 34h16v3H24z" />
+      <path d="M28 41h8l-4 11z" /><path d="M8 55h48v4H8z" />
+    </SvgIcon>
+  );
+}
+
+function SyringeIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <g transform="rotate(-45 32 32)">
+        <path d="M29 2h6v10h-6z" /><path d="M22 0h20v4H22z" /><path d="M23 12h18v30H23z" />
+        <path d="M26 15h12v24H26z" fill="#FFFFFF" />
+        <path d="M26 20h7v2h-7z" /><path d="M26 26h7v2h-7z" /><path d="M26 32h7v2h-7z" />
+        <path d="M28 42h8v6h-8z" /><path d="M31 48h2v14h-2z" />
+      </g>
+    </SvgIcon>
+  );
+}
+
+function LeakageSealingIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <path d="M26 4S8 26 8 38a18 18 0 0 0 36 0C44 26 26 4 26 4Z" />
+      <path d="M42 26 26 32v12c0 9 7 15.6 16 19 9-3.4 16-10 16-19V32l-16-6Z" fill="#FFFFFF" />
+      <path d="M42 30 30 34.5V44c0 7 5.2 12.2 12 15 6.8-2.8 12-8 12-15v-9.5L42 30Z" />
+      <path d="M42 36.5l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8Z" fill="#FFFFFF" />
+    </SvgIcon>
+  );
+}
+
+function WrenchIcon({ className }) {
+  return (<SvgIcon className={className}><path d="M45.9 6a16 16 0 0 0-14.3 23.1L8.9 51.8a4.6 4.6 0 0 0 6.5 6.5l22.7-22.7A16 16 0 0 0 58 12.1l-8.4 8.4-6.1-1.1-1.1-6.1L50.8 5A16.4 16.4 0 0 0 45.9 6Z" /></SvgIcon>);
+}
+
+function SparklesIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <path d="M32 8c1.8 8.6 5.6 12.4 14.2 14.2C37.6 24 33.8 27.8 32 36.4 30.2 27.8 26.4 24 17.8 22.2 26.4 20.4 30.2 16.6 32 8Z" />
+      <path d="M47 34c1 4.8 3.1 6.9 7.9 7.9-4.8 1-6.9 3.1-7.9 7.9-1-4.8-3.1-6.9-7.9-7.9 4.8-1 6.9-3.1 7.9-7.9Z" />
+      <path d="M20 38c.8 4 2.6 5.8 6.6 6.6-4 .8-5.8 2.6-6.6 6.6-.8-4-2.6-5.8-6.6-6.6 4-.8 5.8-2.6 6.6-6.6Z" />
+    </SvgIcon>
+  );
+}
+
+/* Solid white-friendly icons for the dark footer bar (match the provided image) */
+function WaterDropIcon({ className }) {
+  return (
+    <SvgIcon className={className} fill="currentColor">
+      <path d="M32 6C32 6 10 30 10 42a22 22 0 0 0 44 0C54 30 32 6 32 6Z" />
+    </SvgIcon>
+  );
+}
+
+function HandshakeIcon({ className }) {
+  return (
+    <SvgIcon className={className} fill="currentColor">
+      <path d="M2 24h12v18H2z" /><path d="M50 24h12v18H50z" />
+      <path d="M16 24l8-5h11l-7 6a3 3 0 0 0 .2 4.6l1.2 1a3.4 3.4 0 0 0 4.4-.2L40 24l8 2v14l-4 4-6-5-2 3-5-4-2 3-5-4-2 2-6-5Z" />
+    </SvgIcon>
+  );
+}
+
+function ShieldCheckIcon({ className }) {
+  return (
+    <SvgIcon className={className} fill="currentColor">
+      <path d="M32 4 10 12v18c0 14 9.6 24.4 22 30 12.4-5.6 22-16 22-30V12L32 4Z" />
+      <path d="M22 31.5 29 38.5 43 24.5 47 28.5 29 46.5 18 35.5Z" fill="#0B2E6D" />
+    </SvgIcon>
+  );
+}
+
+/* Keep original ShieldDrop for any other use (scope of work uses LeakageSealingIcon) */
+function ShieldDropIcon({ className }) {
+  return (
+    <SvgIcon className={className}>
+      <path d="M32 4 10 12v18c0 14 9.6 24.4 22 30 12.4-5.6 22-16 22-30V12L32 4Z" />
+      <path d="M32 20s-9 12-9 18a9 9 0 0 0 18 0c0-6-9-18-9-18Z" fill="#FFFFFF" />
+    </SvgIcon>
+  );
+}
+
+const scopeIcons = {
+  magnifier: MagnifierIcon,
+  'hammer-drill': HammerDrillIcon,
+  'injection-packer': InjectionPackerIcon,
+  syringe: SyringeIcon,
+  'shield-drop': LeakageSealingIcon,
+  wrench: WrenchIcon,
+  sparkles: SparklesIcon
+};
+const footerIcons = {
+  'water-drop': WaterDropIcon,
+  handshake: HandshakeIcon,
+  'shield-check': ShieldCheckIcon
+};
+
+function ContactRow({ icon, children }) {
+  return (
+    <li className="flex items-start gap-[8px]">
+      <span className="mt-[1px] flex h-[20px] w-[20px] shrink-0 items-center justify-center rounded-full bg-navy text-white">
+        {icon}
+      </span>
+      <span className="min-w-0 flex-1 break-words text-[12.5px] leading-[18px] text-navy">{children}</span>
+    </li>
+  );
+}
+
+function QuotationHeader({ fields, setField, docType, setDocType }) {
+  const titleText = docType === 'bill' ? 'BILL' : 'QUOTATION';
+  const noLabel = docType === 'bill' ? 'Bill No.' : 'Quotation No.';
+  return (
+    <header className="relative flex h-[240px] items-stretch overflow-hidden">
+      <div className="flex flex-1 items-start gap-[8px] pl-[14px] pr-[4px] pt-[14px] overflow-hidden">
+        {/* Logo upload zone – clean dashed box */}
+        <div className="shrink-0 w-[120px] h-[120px]">
+          <ImageZone storageKey={STORAGE_LOGO} defaultW={120} defaultH={120} label="Logo">
+            <div className="w-full h-full border-2 border-dashed border-navy/60 rounded-md bg-gray-50 flex items-center justify-center">
+              {/* empty – no icon or text */}
+            </div>
+          </ImageZone>
+        </div>
+        <div className="min-w-0 flex-1 self-stretch border-l-[3px] border-navy pl-[12px] pt-[6px] overflow-hidden">
+          <h1 className="text-[26px] font-extrabold leading-[30px] tracking-[-0.4px] text-navy break-words">
+            {company.name}
+          </h1>
+          <p className="mt-[4px] inline-block border-b-[2.5px] border-brandblue pb-[4px] text-[13px] font-bold tracking-[0.05em] text-brandblue">
+            {company.tagline}
+          </p>
+          <ul className="mt-[10px] space-y-[6px]">
+            <ContactRow icon={<PhoneSvg />}>{company.phone}</ContactRow>
+            <ContactRow icon={<MailSvg />}>{company.email}</ContactRow>
+            <ContactRow icon={<MapPinSvg />}>
+              {company.address.map((line) => (
+                <span key={line} className="block">{line}</span>
+              ))}
+            </ContactRow>
+          </ul>
+        </div>
+      </div>
+      <div className="relative w-[320px] shrink-0">
+        <div className="relative h-[220px] pl-[64px] pr-[20px] pt-[14px]" style={{ overflow: 'visible' }}>
+          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 320 220" preserveAspectRatio="none" aria-hidden="true" style={{ zIndex: 0 }}>
+            <polygon points="51,0 320,0 320,220 86,220 0,123" fill="#0B2E6D" />
+          </svg>
+          <div className="relative" style={{ zIndex: 1 }}>
+            <h2 className="text-center text-[34px] font-extrabold leading-[40px] tracking-[-0.4px] text-white" style={{ textDecoration: 'none', borderBottom: 'none' }}>{titleText}</h2>
+            <div className="mx-auto mt-[4px] flex justify-center gap-[10px] no-print">
+              <button
+              type="button"
+              onClick={() => setDocType('quotation')}
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                color: docType === 'quotation' ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                borderBottom: docType === 'quotation' ? '2px solid #fff' : '2px solid transparent',
+                padding: '0 2px 1px',
+                fontFamily: 'Montserrat, sans-serif'
+              }}
+              >QUOTATION</button>
+              <button
+              type="button"
+              onClick={() => setDocType('bill')}
+              style={{
+                fontSize: '10px',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                color: docType === 'bill' ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                borderBottom: docType === 'bill' ? '2px solid #fff' : '2px solid transparent',
+                padding: '0 2px 1px',
+                fontFamily: 'Montserrat, sans-serif'
+              }}
+              >BILL</button>
+            </div>
+            <div className="quote-deco-line mx-auto" aria-hidden="true" style={{
+              marginTop: '10px',
+              width: '200px',
+              height: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <span style={{ flex: 1, height: '3px', background: '#ffffff', display: 'block' }} />
+              <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#ffffff', display: 'block', flexShrink: 0 }} />
+              <span style={{ flex: 1, height: '3px', background: '#ffffff', display: 'block' }} />
+            </div>
+            <dl className="ml-[4px] mt-[16px] space-y-[18px]">
+              <div className="flex items-end gap-[6px]">
+                <dt className="w-[96px] shrink-0 text-[13px] leading-[15px] text-white">{noLabel}</dt>
+                <span className="text-[13px] leading-[15px] text-white">:</span>
+                <dd className="w-[160px]">
+                  <EditLine white value={fields.quotationNo} onChange={(v) => setField('quotationNo', v)} />
+                </dd>
+              </div>
+              <div className="flex items-end gap-[6px]">
+                <dt className="w-[96px] shrink-0 text-[13px] leading-[15px] text-white">Date</dt>
+                <span className="text-[13px] leading-[15px] text-white">:</span>
+                <dd className="w-[160px]">
+                  <EditLine white value={fields.date} onChange={(v) => setField('date', v)} />
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function SectionTab({ icon, title, id }) {
+  return (
+    <div className="flex">
+      <div className="relative flex h-[28px] items-center gap-[7px] pl-[10px] pr-[26px]" style={{ overflow: 'visible' }}>
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true" style={{ zIndex: 0 }}>
+          <polygon points="0,0 88,0 100,28 0,28" fill="#0B2E6D" />
+        </svg>
+        <span className="relative flex h-[15px] w-[15px] items-center justify-center text-white" style={{ zIndex: 1 }}>{icon}</span>
+        <h2 id={id} className="relative text-[11.5px] font-semibold tracking-[0.04em] text-white" style={{ zIndex: 1 }}>{title}</h2>
+      </div>
+    </div>
+  );
+}
+
+function FieldRow({ label, children }) {
+  return (
+    <div className="flex items-end gap-[6px]">
+      <span className="w-[88px] shrink-0 text-[12.5px] leading-[15px] font-semibold text-navy-dark pt-0.5">{label}</span>
+      <span className="text-[12.5px] leading-[15px] text-navy">:</span>
+      <div className="flex-1 min-w-0">{children}</div>
+    </div>
+  );
+}
+
+function DetailsSection({ fields, setField }) {
+  return (
+    <section className="mt-[4px] grid grid-cols-2 gap-[18px] px-[20px]">
+      <div>
+        <SectionTab id="customer-details" icon={<UserSvg />} title="TO (CUSTOMER DETAILS)" />
+        <div aria-labelledby="customer-details" className="min-h-[160px] rounded-b-[6px] rounded-tr-[6px] border-[2px] border-navy px-[12px] pt-[12px] pb-[12px]">
+          <div className="space-y-[14px]">
+            {customerFields.map((field) => (
+              <FieldRow key={field.key} label={field.label}>
+                {field.lines === 2 ? (
+                  <EditLine multiline value={fields[field.key]} onChange={(v) => setField(field.key, v)} />
+                ) : (
+                  <EditLine value={fields[field.key]} onChange={(v) => setField(field.key, v)} />
+                )}
+              </FieldRow>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div>
+        <SectionTab id="work-details" icon={<ClipboardSvg />} title="WORK DETAILS" />
+        <div aria-labelledby="work-details" className="min-h-[160px] rounded-b-[6px] rounded-tr-[6px] border-[2px] border-navy px-[12px] pt-[12px] pb-[12px]">
+          <div className="space-y-[14px]">
+            <div className="mt-1">
+              <FieldRow label="Work">
+                <EditLine value={fields.workDescription} onChange={(v) => setField('workDescription', v)} />
+              </FieldRow>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ScopeOfWork() {
+  return (
+    <section className="mt-[12px] px-[20px]">
+      <SectionTab id="scope-of-work" icon={<SettingsSvg />} title="SCOPE OF WORK" />
+      <div aria-labelledby="scope-of-work" className="rounded-b-[6px] rounded-tr-[6px] border-[2px] border-navy px-[4px] py-[8px]">
+        <ul className="grid grid-cols-7">
+          {scopeOfWork.map((step, index) => {
+            const Icon = scopeIcons[step.icon];
+            return (
+              <li key={step.label.join(' ')} className={`flex flex-col items-center gap-[6px] px-[3px] py-[3px] text-center ${index !== 0 ? 'border-l border-navy/60' : ''}`}>
+                <span className="flex h-[44px] w-[44px] items-center justify-center rounded-full border-[2px] border-navy">
+                  <Icon className="h-[24px] w-[24px]" />
+                </span>
+                <p className="text-[9.5px] font-semibold leading-[12px] text-navy">
+                  {step.label.map((line) => <span key={line} className="block">{line}</span>)}
+                </p>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+function ItemsTable({ fields, setField, items, setItems }) {
+  const headers = [
+    { label: 'SR. NO.', width: 'w-[9%]' },
+    { label: 'DESCRIPTION', width: 'w-[41%]' },
+    { label: 'UNIT', width: 'w-[10%]' },
+    { label: 'QTY', width: 'w-[12%]' },
+    { label: 'RATE (₹)', width: 'w-[14%]' },
+    { label: 'AMOUNT (₹)', width: 'w-[14%]' }
+  ];
+
+  const updateItem = (id, key, val) => {
+    setItems((prev) => {
+      const next = prev.map((it) => it.id === id ? { ...it, [key]: val } : it);
+      saveJSON(STORAGE_ITEMS, next);
+      return next;
+    });
+  };
+
+  const addRow = () => {
+    setItems((prev) => {
+      const nextId = prev.length ? Math.max(...prev.map((p) => p.id)) + 1 : 1;
+      const next = [...prev, { id: nextId, description: '', unit: '', qty: '', rate: '', amount: '' }];
+      saveJSON(STORAGE_ITEMS, next);
+      return next;
+    });
+  };
+
+  const removeRow = (id) => {
+    setItems((prev) => {
+      if (prev.length <= 1) return prev;
+      const next = prev.filter((it) => it.id !== id);
+      saveJSON(STORAGE_ITEMS, next);
+      return next;
+    });
+  };
+
+  return (
+    <section className="mt-[12px] px-[20px]">
+      <table className="w-full table-fixed border-collapse border-[2px] border-navy text-navy">
+        <thead>
+          <tr className="bg-navy text-white">
+            {headers.map((header) => (
+              <th key={header.label} scope="col" className={`${header.width} border border-navy px-[5px] py-[6px] text-[11px] font-semibold tracking-[0.03em]`}>{header.label}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {items.map((item, index) => (
+            <tr key={item.id} className="align-top">
+              <td className="border border-navy px-[5px] py-[8px] text-center text-[12.5px] relative">
+                {index + 1}
+                {items.length > 1 && (
+                  <button type="button" className="no-print upload-btn" onClick={() => removeRow(item.id)} style={{ display: 'block', margin: '4px auto 0', fontSize: '9px' }} title="Remove row">✕</button>
+                )}
+              </td>
+              <td className="border border-navy px-[8px] py-[8px] text-[12.5px] leading-[18px]">
+                <EditLine multiline value={item.description} onChange={(v) => updateItem(item.id, 'description', v)} />
+              </td>
+              <td className="border border-navy px-[5px] py-[8px] text-center text-[12.5px] leading-[16px]">
+                <EditLine value={item.unit} onChange={(v) => updateItem(item.id, 'unit', v)} />
+              </td>
+              <td className="border border-navy px-[8px] py-[8px] align-bottom">
+                <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+                  <EditLine value={item.qty} onChange={(v) => updateItem(item.id, 'qty', v)} />
+                </div>
+              </td>
+              <td className="border border-navy px-[8px] py-[8px] align-bottom">
+                <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+                  <EditLine value={item.rate} onChange={(v) => updateItem(item.id, 'rate', v)} />
+                </div>
+              </td>
+              <td className="border border-navy px-[8px] py-[8px] align-bottom">
+                <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+                  <EditLine value={item.amount} onChange={(v) => updateItem(item.id, 'amount', v)} />
+                </div>
+              </td>
+            </tr>
+          ))}
+          <tr className="no-print">
+            <td colSpan={6} className="border border-navy px-[8px] py-[6px]">
+              <button type="button" className="upload-btn" onClick={addRow} style={{ fontWeight: 600 }}>+ Add Row</button>
+            </td>
+          </tr>
+          <tr>
+            <td className="border-0" colSpan={3} />
+            <th scope="row" colSpan={2} className="border border-navy bg-navy px-[8px] py-[6px] text-left text-[12px] font-semibold text-white">TOTAL AMOUNT</th>
+            <td className="border border-navy px-[8px] py-[6px]">
+              <div className="flex items-end gap-[4px]" style={{ minHeight: '22px' }}>
+                <span className="text-[12px] leading-[14px] shrink-0">₹</span>
+                <div className="flex-1 min-w-0">
+                  <EditLine value={fields.total} onChange={(v) => setField('total', v)} />
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+function TermsAndSignature({ fields, setField }) {
+  return (
+    <section className="mt-[16px] flex flex-1 items-start gap-[14px] px-[20px] pb-[12px]">
+      <div className="w-[52%] self-stretch border-r border-navy/50 pr-[14px]">
+        <div className="flex items-center gap-[7px]">
+          <ClipboardListSvg className="h-[20px] w-[20px] text-navy shrink-0" />
+          <h2 className="text-[12.5px] font-bold tracking-[0.04em] text-navy">TERMS &amp; CONDITIONS</h2>
+        </div>
+        <ol className="mt-[8px] list-decimal space-y-[4px] pl-[18px] text-[10px] leading-[14px] text-navy marker:text-navy">
+          {terms.map((term) => <li key={term}>{term}</li>)}
+        </ol>
+      </div>
+      <div className="flex flex-1 items-start justify-between gap-[10px] pt-[8px]">
+        <div className="w-[180px]">
+          <ImageZone storageKey={STORAGE_SIG} defaultH={52} defaultW={180} label="Signature">
+            <div style={{ height: 52 }} aria-hidden="true" />
+          </ImageZone>
+          <div style={{ borderBottom: '1.5px solid #0B2E6D', marginTop: 0 }} />
+          <p className="mt-[6px] text-[11.5px] font-bold tracking-[0.04em] text-brandblue">CONTRACTOR SIGNATURE</p>
+          <dl className="mt-[10px] space-y-[10px]">
+            <div className="flex items-end gap-[6px]">
+              <dt className="w-[44px] shrink-0 text-[11.5px] leading-[13px] text-navy">Name</dt>
+              <span className="text-[11.5px] leading-[13px] text-navy">:</span>
+              <dd className="flex-1">
+                <EditLine value={fields.sigName} onChange={(v) => setField('sigName', v)} />
+              </dd>
+            </div>
+            <div className="flex items-end gap-[6px]">
+              <dt className="w-[44px] shrink-0 text-[11.5px] leading-[13px] text-navy">Mobile</dt>
+              <span className="text-[11.5px] leading-[13px] text-navy">:</span>
+              <dd className="flex-1">
+                <EditLine value={fields.sigMobile} onChange={(v) => setField('sigMobile', v)} />
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <div style={{ width: 110 }}>
+          <ImageZone storageKey={STORAGE_STAMP} defaultH={110} defaultW={110} label="Stamp">
+            <StampSvg className="h-[110px] w-[110px]" />
+          </ImageZone>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function FooterBar() {
+  return (
+    <footer className="mt-auto relative flex h-[52px] w-full items-stretch overflow-hidden">
+      {/* Full-width SVG background with matching diagonal split (navy left + blue right) */}
+      <svg
+        className="absolute inset-0 h-full w-full"
+        viewBox="0 0 794 52"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+        style={{ zIndex: 0 }}
+      >
+        {/* Dark navy left section – right edge is diagonal to match blue */}
+        <polygon points="0,0 560,0 520,52 0,52" fill="#0B2E6D" />
+        {/* Bright blue Thank You section – left edge diagonal matching the navy */}
+        <polygon points="560,0 794,0 794,52 520,52" fill="#1A56C4" />
+      </svg>
+
+      {/* Badges content (sits on navy) */}
+      <ul className="relative z-10 flex h-full flex-1 items-center" style={{ maxWidth: '70%' }}>
+        {footerBadges.map((badge, index) => {
+          const Icon = footerIcons[badge.icon];
+          return (
+            <li
+              key={badge.label}
+              className={`flex h-full flex-1 items-center justify-center gap-[6px] px-[8px] text-white ${
+                index !== 0 ? 'border-l border-white/35' : ''
+              }`}
+            >
+              <Icon className="h-[18px] w-[18px] shrink-0 text-white" />
+              <span className="whitespace-nowrap text-[11px] font-semibold tracking-[0.03em] text-white">
+                {badge.label}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+
+      {/* Thank You text (sits on blue) */}
+      <div
+        className="relative z-10 flex h-full w-[250px] shrink-0 flex-col items-center justify-center pl-[20px] pr-[12px] text-center"
+      >
+        <p className="font-script text-[20px] font-bold leading-none text-white">
+          Thank You!
+        </p>
+        <p className="mt-[3px] font-script text-[11.5px] leading-none text-white">
+          We look forward to working with you.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+function App() {
+  // All default fields are empty strings – no pre-filled data
+  const defaultFields = {
+    quotationNo: '',
+    date: '',
+    clientName: '',
+    siteAddress: '',
+    contactNo: '',
+    emailId: '',
+    workDescription: '',
+    total: '',
+    sigName: '',
+    sigMobile: ''
+  };
+
+  // Always start with defaults – do NOT load from localStorage for fields/items
+  const [fields, setFields] = useState({ ...defaultFields });
+  const [items, setItems] = useState(defaultLineItems);
+  const [docType, setDocTypeState] = useState(() => loadJSON(STORAGE_DOCTYPE, 'quotation'));
+
+  const setField = (key, val) => {
+    setFields((prev) => {
+      const next = { ...prev, [key]: val };
+      saveJSON(STORAGE_FIELDS, next);
+      return next;
+    });
+  };
+
+  const setDocType = (t) => {
+    setDocTypeState(t);
+    saveJSON(STORAGE_DOCTYPE, t);
+  };
+
+  // Save items to localStorage on change
+  useEffect(() => {
+    saveJSON(STORAGE_ITEMS, items);
+  }, [items]);
+
+  useEffect(() => {
+    document.getElementById('btn-pdf').onclick = async () => {
+      const btn = document.getElementById('btn-pdf');
+      const sheet = document.querySelector('.sheet');
+      if (!sheet || !window.html2canvas || !window.jspdf) return;
+      btn.disabled = true;
+      btn.textContent = 'Generating PDF...';
+      document.body.classList.add('pdf-exporting');
+
+      const scaleEl = document.querySelector('.sheet-scale');
+      const prevTransform = scaleEl ? scaleEl.style.transform : '';
+      if (scaleEl) scaleEl.style.transform = 'none';
+
+      const touched = [];
+      const clearClip = (el) => {
+        if (!el) return;
+        touched.push({
+          el,
+          overflow: el.style.overflow,
+          overflowX: el.style.overflowX,
+          overflowY: el.style.overflowY
+        });
+        el.style.overflow = 'visible';
+        el.style.overflowX = 'visible';
+        el.style.overflowY = 'visible';
+      };
+      clearClip(sheet);
+      sheet.querySelectorAll('*').forEach((el) => {
+        const cs = window.getComputedStyle(el);
+        if (cs.overflow === 'hidden' || cs.overflowX === 'hidden' || cs.overflowY === 'hidden') {
+          clearClip(el);
+        }
+      });
+
+      try {
+        sheet.querySelectorAll('textarea.edit-line').forEach((el) => {
+          el.style.height = 'auto';
+          el.style.height = Math.max(22, el.scrollHeight) + 'px';
+          el.style.overflow = 'visible';
+        });
+        await new Promise((r) => setTimeout(r, 100));
+
+        const canvas = await html2canvas(sheet, {
+          scale: 2.5,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          x: 0,
+          y: 0,
+          width: Math.ceil(sheet.getBoundingClientRect().width),
+          height: Math.ceil(sheet.scrollHeight),
+          onclone: (doc) => {
+            const clonedSheet = doc.querySelector('.sheet');
+            if (clonedSheet) {
+              clonedSheet.style.overflow = 'visible';
+              clonedSheet.style.boxShadow = 'none';
+              clonedSheet.style.border = 'none';
+              clonedSheet.style.transform = 'none';
+            }
+            const scaleClone = doc.querySelector('.sheet-scale');
+            if (scaleClone) scaleClone.style.transform = 'none';
+
+            doc.querySelectorAll('textarea.edit-line, input.edit-line').forEach((el) => {
+              const div = doc.createElement('div');
+              const isWhite = el.classList.contains('white-line');
+              const val = el.value || '';
+              div.className = el.className;
+              div.textContent = val;
+              div.style.cssText = [
+                'display:block',
+                'width:100%',
+                'max-width:100%',
+                'box-sizing:border-box',
+                'background:transparent',
+                'font-family:Montserrat,sans-serif',
+                'font-size:12.5px',
+                'line-height:18px',
+                'color:' + (isWhite ? '#ffffff' : '#0B2E6D'),
+                'border:none',
+                'border-bottom:1.5px solid ' + (isWhite ? '#ffffff' : '#0B2E6D'),
+                'padding:2px 4px 6px 4px',
+                'margin:0',
+                'min-height:22px',
+                'white-space:pre-wrap',
+                'word-wrap:break-word',
+                'overflow-wrap:anywhere',
+                'word-break:break-word',
+                'overflow:visible',
+                'height:auto'
+              ].join(';');
+              el.parentNode.replaceChild(div, el);
+            });
+
+            doc.querySelectorAll('.no-print, .toolbar, .upload-btn, .img-controls, .resize-handle')
+              .forEach((el) => {
+                el.style.display = 'none';
+              });
+            doc.querySelectorAll('.quote-clip').forEach((el) => {
+              el.style.clipPath = 'polygon(16% 0, 100% 0, 100% 100%, 27% 100%, 0 56%)';
+              el.style.webkitClipPath = 'polygon(16% 0, 100% 0, 100% 100%, 27% 100%, 0 56%)';
+              el.style.backgroundColor = '#0B2E6D';
+            });
+            doc.querySelectorAll('.tab-clip').forEach((el) => {
+              el.style.clipPath = 'polygon(0 0, calc(100% - 22px) 0, 100% 100%, 0 100%)';
+              el.style.webkitClipPath = 'polygon(0 0, calc(100% - 22px) 0, 100% 100%, 0 100%)';
+            });
+            doc.querySelectorAll('.thanks-clip').forEach((el) => {
+              el.style.clipPath = 'polygon(9% 0, 100% 0, 100% 100%, 0 100%)';
+              el.style.webkitClipPath = 'polygon(9% 0, 100% 0, 100% 100%, 0 100%)';
+            });
+            doc.querySelectorAll('.quote-deco-line span').forEach((el) => {
+              el.style.backgroundColor = '#ffffff';
+              el.style.background = '#ffffff';
+            });
+            doc.querySelectorAll('h2').forEach((el) => {
+              el.style.textDecoration = 'none';
+              el.style.borderBottom = 'none';
+              el.style.boxShadow = 'none';
+            });
+            doc.querySelectorAll('td').forEach((el) => {
+              el.style.overflow = 'visible';
+              el.style.wordBreak = 'break-word';
+              el.style.overflowWrap = 'anywhere';
+            });
+          }
+        });
+
+        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+          compress: true
+        });
+
+        const pageW = 210;
+        const pageH = 297;
+        const margin = 1.5;
+        const maxW = pageW - margin * 2;
+        const maxH = pageH - margin * 2;
+        const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
+        const imgW = canvas.width * ratio;
+        const imgH = canvas.height * ratio;
+        const x = (pageW - imgW) / 2;
+        const y = margin;
+
+        pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH, undefined, 'MEDIUM');
+
+        const titleEl = sheet.querySelector('h2');
+        const name = (titleEl && titleEl.textContent) || 'Quotation';
+        pdf.save(name.trim().replace(/\s+/g, '_') + '.pdf');
+      } catch (err) {
+        console.error(err);
+        alert('PDF generation failed. Please try again.');
+      } finally {
+        if (scaleEl) scaleEl.style.transform = prevTransform;
+        touched.forEach(({ el, overflow, overflowX, overflowY }) => {
+          el.style.overflow = overflow;
+          el.style.overflowX = overflowX;
+          el.style.overflowY = overflowY;
+        });
+        document.body.classList.remove('pdf-exporting');
+        btn.disabled = false;
+        btn.textContent = 'Download PDF';
+      }
+    };
+    document.getElementById('btn-clear-storage').onclick = () => {
+      localStorage.removeItem(STORAGE_FIELDS);
+      localStorage.removeItem(STORAGE_ITEMS);
+      localStorage.removeItem(STORAGE_DOCTYPE);
+      localStorage.removeItem(STORAGE_SIG);
+      localStorage.removeItem(STORAGE_STAMP);
+      localStorage.removeItem(STORAGE_LOGO);
+      // Reset fields and items to defaults
+      setFields({ ...defaultFields });
+      setItems(defaultLineItems);
+    };
+  }, []);
+
+  return (
+    <div className="sheet-wrap min-h-full w-full">
+      <div className="sheet-scale">
+        <main className="sheet flex flex-col overflow-hidden border border-navy/20 shadow-sheet">
+          <QuotationHeader fields={fields} setField={setField} docType={docType} setDocType={setDocType} />
+          <DetailsSection fields={fields} setField={setField} />
+          <ScopeOfWork />
+          <ItemsTable fields={fields} setField={setField} items={items} setItems={setItems} />
+          <TermsAndSignature fields={fields} setField={setField} />
+          <FooterBar />
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
