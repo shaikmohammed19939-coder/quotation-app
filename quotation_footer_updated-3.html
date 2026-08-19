@@ -126,6 +126,55 @@
       padding-right: 4px;
     }
 
+    /* Per-cell vertical text alignment for Unit/Qty/Rate/Amount cells.
+       height:100% lets the wrapper fill the full (row-height-tall) table
+       cell so top/center/bottom actually differ when a neighboring cell
+       (e.g. a multi-line description) makes the row taller. */
+    .cell-align-wrap {
+      position: relative;
+      min-height: 36px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .cell-align-wrap.cell-align-top { justify-content: flex-start; }
+    .cell-align-wrap.cell-align-center { justify-content: center; }
+    .cell-align-wrap.cell-align-bottom { justify-content: flex-end; }
+    .cell-align-toolbar {
+      display: none;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 2px;
+      justify-content: center;
+      background: #eef2fa;
+      border-radius: 6px;
+    }
+    .cell-align-wrap:focus-within .cell-align-toolbar {
+      display: flex;
+    }
+    .cell-align-toolbar button {
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      border: none;
+      background: transparent;
+      color: #5b6b85;
+      font-family: Montserrat, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cell-align-toolbar button.active {
+      background: #0B2E6D;
+      color: #ffffff;
+    }
+    body.pdf-exporting .cell-align-toolbar {
+      display: none !important;
+    }
+
     .img-box {
       position: relative;
       overflow: hidden;
@@ -2595,6 +2644,20 @@ function rowHasContent(item) {
     (item.rate || '').toString().trim() || (item.amount || '').toString().trim());
 }
 
+function AlignableCell({ value, align, onChange, onAlignChange, className = '' }) {
+  const resolvedAlign = align || 'bottom';
+  return (
+    <div className={`cell-align-wrap cell-align-${resolvedAlign}`}>
+      <EditLine multiline value={value} onChange={onChange} className={className} />
+      <div className="cell-align-toolbar no-print">
+        <button type="button" className={resolvedAlign === 'top' ? 'active' : ''} title="Align top" onClick={() => onAlignChange('top')}>T</button>
+        <button type="button" className={resolvedAlign === 'center' ? 'active' : ''} title="Align center" onClick={() => onAlignChange('center')}>C</button>
+        <button type="button" className={resolvedAlign === 'bottom' ? 'active' : ''} title="Align bottom" onClick={() => onAlignChange('bottom')}>B</button>
+      </div>
+    </div>
+  );
+}
+
 const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canDelete, ts, borderCls, cellPad, defaults, onUpdateItem, onDuplicateRow, onMoveRow, onRemoveRow }) {
   const handleDeleteClick = () => {
     if (rowHasContent(item)) {
@@ -2643,28 +2706,42 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
       )}
       {ts.showUnit && (
         <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px] leading-[16px]`}>
-          <EditLine value={item.unit} onChange={(v) => onUpdateItem(item.id, 'unit', v)} />
+          <AlignableCell
+            value={item.unit}
+            align={item.unitAlign || 'top'}
+            onChange={(v) => onUpdateItem(item.id, 'unit', v)}
+            onAlignChange={(a) => onUpdateItem(item.id, 'unitAlign', a)}
+          />
         </td>
       )}
       {ts.showQty && (
-        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-            <EditLine value={item.qty} onChange={(v) => onUpdateItem(item.id, 'qty', v)} />
-          </div>
+        <td className={`${borderCls} px-[8px] ${cellPad}`}>
+          <AlignableCell
+            value={item.qty}
+            align={item.qtyAlign}
+            onChange={(v) => onUpdateItem(item.id, 'qty', v)}
+            onAlignChange={(a) => onUpdateItem(item.id, 'qtyAlign', a)}
+          />
         </td>
       )}
       {ts.showRate && (
-        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-            <EditLine value={item.rate} onChange={(v) => onUpdateItem(item.id, 'rate', v)} />
-          </div>
+        <td className={`${borderCls} px-[8px] ${cellPad}`}>
+          <AlignableCell
+            value={item.rate}
+            align={item.rateAlign}
+            onChange={(v) => onUpdateItem(item.id, 'rate', v)}
+            onAlignChange={(a) => onUpdateItem(item.id, 'rateAlign', a)}
+          />
         </td>
       )}
       {ts.showAmount && (
-        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
-          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
-            <EditLine value={item.amount} onChange={(v) => onUpdateItem(item.id, 'amount', v)} />
-          </div>
+        <td className={`${borderCls} px-[8px] ${cellPad}`}>
+          <AlignableCell
+            value={item.amount}
+            align={item.amountAlign}
+            onChange={(v) => onUpdateItem(item.id, 'amount', v)}
+            onAlignChange={(a) => onUpdateItem(item.id, 'amountAlign', a)}
+          />
         </td>
       )}
     </tr>
