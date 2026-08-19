@@ -663,45 +663,6 @@
       font-family: Montserrat, sans-serif;
       color: var(--navy);
     }
-    .dt-color-swatch {
-      width: 24px; height: 24px; border-radius: 50%;
-      border: 2px solid #fff; box-shadow: 0 0 0 1px #c7d4ee;
-      cursor: pointer; flex-shrink: 0;
-    }
-    .dt-color-popover {
-      display: flex; flex-direction: column; gap: 8px;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      background: #fff;
-      border: 1px solid #c7d4ee;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.2);
-      z-index: 60;
-      width: 206px;
-      animation: pop-in 140ms ease;
-    }
-    .dt-color-swatch-row { display: flex; flex-wrap: wrap; gap: 7px; }
-    .dt-color-custom-row {
-      display: flex; align-items: center; gap: 7px;
-      padding-top: 8px; border-top: 1px solid #eef0f5;
-    }
-    .dt-color-native {
-      width: 30px; height: 30px; padding: 0; border: 1px solid #c7d4ee; border-radius: 8px; cursor: pointer; flex-shrink: 0;
-    }
-    .dt-color-hex {
-      flex: 1; min-width: 0;
-      height: 30px;
-      border: 1px solid #c7d4ee;
-      border-radius: 6px;
-      padding: 0 8px;
-      font-size: 12px;
-      font-family: Montserrat, sans-serif;
-      color: var(--navy);
-      text-transform: uppercase;
-    }
-    .dt-color-apply { width: 100%; font-weight: 600; }
     @keyframes pop-in { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
     /* ===== Row action buttons ===== */
@@ -752,6 +713,90 @@
       .modal-sheet { border-radius: 16px; max-height: 80vh; }
     }
     @keyframes sheet-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ===== Professional color picker modal (Material / Color / Clear) ===== */
+    .cp-overlay { align-items: center; }
+    .cp-sheet { max-width: 340px; border-radius: 16px; }
+    .cp-tabs {
+      display: flex; flex-shrink: 0; border-bottom: 1px solid #e6eaf2; background: #f7f9fd;
+    }
+    .cp-tab {
+      flex: 1; padding: 11px 6px; text-align: center; background: none; border: none;
+      font-family: Montserrat, sans-serif; font-size: 13px; font-weight: 600; color: #6b7690;
+      cursor: pointer; border-bottom: 2px solid transparent;
+    }
+    .cp-tab.active { color: var(--navy); border-bottom-color: var(--brandblue); }
+    .cp-body { padding: 16px; overflow-y: auto; }
+    .cp-material-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    }
+    .cp-material-swatch {
+      width: 100%; aspect-ratio: 1; border-radius: 50%; border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #d8e0f0; cursor: pointer; padding: 0;
+    }
+    .cp-custom { display: flex; flex-direction: column; gap: 16px; }
+    .cp-sv-box {
+      position: relative; width: 100%; height: 160px; border-radius: 10px;
+      overflow: hidden; cursor: crosshair; touch-action: none;
+    }
+    .cp-sv-white-overlay, .cp-sv-black-overlay {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .cp-sv-white-overlay { background: linear-gradient(to right, #fff, rgba(255,255,255,0)); }
+    .cp-sv-black-overlay { background: linear-gradient(to top, #000, rgba(0,0,0,0)); }
+    .cp-sv-thumb {
+      position: absolute; width: 18px; height: 18px; margin: -9px;
+      border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.4);
+      pointer-events: none;
+    }
+    .cp-hue-slider, .cp-opacity-slider {
+      position: relative; width: 100%; height: 16px; border-radius: 8px; cursor: pointer; touch-action: none;
+    }
+    .cp-hue-slider {
+      background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+    }
+    .cp-opacity-slider {
+      background:
+        linear-gradient(to right, transparent, var(--cp-op-color)),
+        repeating-conic-gradient(#d8d8d8 0% 25%, #fff 0% 50%) 0 0 / 10px 10px;
+    }
+    .cp-hue-thumb, .cp-opacity-thumb {
+      position: absolute; top: 50%; width: 16px; height: 16px; margin-left: -8px; margin-top: -8px;
+      border-radius: 50%; background: #fff; border: 2px solid #fff;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.35); pointer-events: none;
+    }
+    .cp-rgb-row { display: flex; gap: 10px; }
+    .cp-rgb-field {
+      flex: 1; display: flex; flex-direction: column; gap: 4px;
+      font-family: Montserrat, sans-serif; font-size: 11px; font-weight: 700; color: #6b7690;
+      text-align: center;
+    }
+    .cp-rgb-field input {
+      width: 100%; box-sizing: border-box; height: 38px; border: 1px solid #d8e0f0; border-radius: 8px;
+      text-align: center; font-size: 14px; font-family: Montserrat, sans-serif; color: var(--navy);
+    }
+    .cp-clear-panel { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; padding: 8px 0 4px; }
+    .cp-clear-panel p { margin: 0; font-family: Montserrat, sans-serif; font-size: 13px; color: #5b6b85; line-height: 1.5; }
+    .cp-clear-btn {
+      padding: 11px 22px; border-radius: 24px; border: 1.5px solid #D32F2F; background: #fff;
+      color: #D32F2F; font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
+    .cp-footer {
+      display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+      border-top: 1px solid #e6eaf2; flex-shrink: 0;
+    }
+    .cp-preview-swatch {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0; border: 1px solid #d8e0f0;
+      background-image: repeating-conic-gradient(#e6eaf2 0% 25%, #fff 0% 50%);
+      background-size: 10px 10px;
+    }
+    .cp-preview-info { flex: 1; min-width: 0; }
+    .cp-preview-hex { font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 700; color: var(--navy); }
+    .cp-preview-rgb { font-family: Montserrat, sans-serif; font-size: 11px; color: #8794ab; }
+    .cp-ok-btn {
+      padding: 11px 26px; border-radius: 24px; border: none; background: var(--navy);
+      color: #fff; font-family: Montserrat, sans-serif; font-size: 14px; font-weight: 700; cursor: pointer;
+    }
     .modal-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 14px 16px; border-bottom: 1px solid #e6eaf2;
@@ -846,7 +891,7 @@
     body.dark-editor .settings-group h4 { color: #7fb0ff; }
     body.dark-editor .desc-toolbar-wrap { background: #1a2333; border-color: #2a3550; }
     body.dark-editor .dt-btn, body.dark-editor .dt-close-btn, body.dark-editor .dt-dd-btn { background: #232f45; color: #dfe6f5; border-color: #2a3550; }
-    body.dark-editor .dt-color-popover, body.dark-editor .dt-dd-list { background: #232f45; border-color: #2a3550; }
+    body.dark-editor .dt-dd-list { background: #232f45; border-color: #2a3550; }
     body.dark-editor .dt-dd-list button { color: #dfe6f5; }
     body.dark-editor .dt-dd-list button:active { background: #2a3550; }
 
@@ -1418,16 +1463,50 @@
     // text convention) capped at 8-21 per spec: 21 is the intended maximum,
     // heading-like size for this document's typography scale.
     const FONT_SIZES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-    const COLOR_SWATCHES = [
-      { label: 'Black', value: '#111111' },
-      { label: 'Dark Blue', value: '#0B2E6D' },
-      { label: 'Blue', value: '#1A56C4' },
-      { label: 'Red', value: '#D32F2F' },
-      { label: 'Green', value: '#1E8E3E' },
-      { label: 'Orange', value: '#E8710A' },
-      { label: 'Purple', value: '#7B1FA2' },
-      { label: 'White', value: '#FFFFFF' }
+    const DEFAULT_TEXT_COLOR = '#0B2E6D';
+    const MATERIAL_COLORS = [
+      '#F44336', '#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#2196F3',
+      '#03A9F4', '#00BCD4', '#009688', '#4CAF50', '#8BC34A', '#CDDC39',
+      '#FFEB3B', '#FFC107', '#FF9800', '#FF5722', '#795548', '#9E9E9E',
+      '#607D8B', '#000000', '#0B2E6D', '#1A56C4', '#FFFFFF'
     ];
+
+    /* ===== Color math for the custom color picker (HSV <-> RGB <-> hex) ===== */
+    function hsvToRgb(h, s, v) {
+      const c = v * s;
+      const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+      const m = v - c;
+      let r = 0, g = 0, b = 0;
+      if (h < 60) { r = c; g = x; b = 0; }
+      else if (h < 120) { r = x; g = c; b = 0; }
+      else if (h < 180) { r = 0; g = c; b = x; }
+      else if (h < 240) { r = 0; g = x; b = c; }
+      else if (h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      return { r: Math.round((r + m) * 255), g: Math.round((g + m) * 255), b: Math.round((b + m) * 255) };
+    }
+    function rgbToHsv(r, g, b) {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const d = max - min;
+      let h = 0;
+      if (d !== 0) {
+        if (max === r) h = 60 * (((g - b) / d) % 6);
+        else if (max === g) h = 60 * ((b - r) / d + 2);
+        else h = 60 * ((r - g) / d + 4);
+      }
+      if (h < 0) h += 360;
+      const s = max === 0 ? 0 : d / max;
+      return { h, s, v: max };
+    }
+    function rgbToHex(r, g, b) {
+      return '#' + [r, g, b].map((x) => Math.max(0, Math.min(255, Math.round(x))).toString(16).padStart(2, '0')).join('');
+    }
+    function hexToRgb(hex) {
+      const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec((hex || '').trim());
+      if (!m) return null;
+      return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
+    }
 
     function formatINR(num) {
       const n = Number(num);
@@ -1551,12 +1630,159 @@
     }
 
     /* ===================== Description rich-text editor ===================== */
+    /* Professional app-style text-color picker (Material grid / custom HSV
+       picker with hue+opacity sliders+RGB / Clear), replacing the OS-native
+       <input type="color"> dialog. Only produces a color value via onApply —
+       it never touches the editor's selection or background itself; that's
+       still handled entirely by DescToolbar's onColor (execCommand
+       'foreColor', i.e. text color only), unchanged. */
+    function ColorPickerModal({ initialColor, onApply, onClose }) {
+      const [tab, setTab] = useState('material');
+      const initRgb = hexToRgb(initialColor) || hexToRgb(DEFAULT_TEXT_COLOR);
+      const initHsv = rgbToHsv(initRgb.r, initRgb.g, initRgb.b);
+      const [hue, setHue] = useState(initHsv.h);
+      const [sat, setSat] = useState(initHsv.s);
+      const [val, setVal] = useState(initHsv.v);
+      const [opacity, setOpacity] = useState(100);
+
+      const rgb = hsvToRgb(hue, sat, val);
+      const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+      const previewColor = opacity < 100
+        ? `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${(opacity / 100).toFixed(2)})`
+        : hex;
+
+      const svRef = useRef(null);
+      const hueRef = useRef(null);
+      const opRef = useRef(null);
+
+      const dragFrom = (ref, onMove) => (e) => {
+        e.preventDefault();
+        const el = ref.current;
+        if (!el) return;
+        try { el.setPointerCapture(e.pointerId); } catch {}
+        const move = (ev) => {
+          const rect = el.getBoundingClientRect();
+          const x = Math.min(Math.max(0, ev.clientX - rect.left), rect.width);
+          const y = Math.min(Math.max(0, ev.clientY - rect.top), rect.height);
+          onMove(x, rect.width, y, rect.height);
+        };
+        move(e);
+        const onUp = () => {
+          el.removeEventListener('pointermove', move);
+          el.removeEventListener('pointerup', onUp);
+          el.removeEventListener('pointercancel', onUp);
+        };
+        el.addEventListener('pointermove', move);
+        el.addEventListener('pointerup', onUp);
+        el.addEventListener('pointercancel', onUp);
+      };
+
+      const onSvDown = dragFrom(svRef, (x, w, y, h) => {
+        setSat(x / w);
+        setVal(1 - y / h);
+      });
+      const onHueDown = dragFrom(hueRef, (x, w) => setHue((x / w) * 360));
+      const onOpacityDown = dragFrom(opRef, (x, w) => setOpacity(Math.round((x / w) * 100)));
+
+      const applyRgbField = (channel, raw) => {
+        const n = Math.max(0, Math.min(255, Math.round(Number(raw)) || 0));
+        const nextRgb = { ...rgb, [channel]: n };
+        const hsv = rgbToHsv(nextRgb.r, nextRgb.g, nextRgb.b);
+        setHue(hsv.h); setSat(hsv.s); setVal(hsv.v);
+      };
+
+      const pickMaterial = (c) => {
+        const mrgb = hexToRgb(c);
+        const hsv = rgbToHsv(mrgb.r, mrgb.g, mrgb.b);
+        setHue(hsv.h); setSat(hsv.s); setVal(hsv.v);
+        setOpacity(100);
+        setTab('color');
+      };
+
+      const handleOk = () => { onApply(previewColor); onClose(); };
+      const handleClear = () => { onApply(DEFAULT_TEXT_COLOR); onClose(); };
+
+      return (
+        <div className="modal-overlay no-print cp-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="modal-sheet cp-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Select Color</h3>
+              <button type="button" className="icon-btn ripple-surface" onClick={onClose}><IconClose className="h-[18px] w-[18px]" /></button>
+            </div>
+            <div className="cp-tabs">
+              <button type="button" className={`cp-tab ${tab === 'material' ? 'active' : ''}`} onClick={() => setTab('material')}>Material</button>
+              <button type="button" className={`cp-tab ${tab === 'color' ? 'active' : ''}`} onClick={() => setTab('color')}>Color</button>
+              <button type="button" className={`cp-tab ${tab === 'clear' ? 'active' : ''}`} onClick={() => setTab('clear')}>Clear</button>
+            </div>
+            <div className="cp-body">
+              {tab === 'material' && (
+                <div className="cp-material-grid">
+                  {MATERIAL_COLORS.map((c) => (
+                    <button key={c} type="button" className="cp-material-swatch" style={{ background: c }} title={c} onClick={() => pickMaterial(c)} />
+                  ))}
+                </div>
+              )}
+              {tab === 'color' && (
+                <div className="cp-custom">
+                  <div
+                    ref={svRef}
+                    className="cp-sv-box"
+                    style={{ background: `hsl(${hue}, 100%, 50%)` }}
+                    onPointerDown={onSvDown}
+                  >
+                    <div className="cp-sv-white-overlay" />
+                    <div className="cp-sv-black-overlay" />
+                    <div className="cp-sv-thumb" style={{ left: (sat * 100) + '%', top: ((1 - val) * 100) + '%' }} />
+                  </div>
+                  <div ref={hueRef} className="cp-hue-slider" onPointerDown={onHueDown}>
+                    <div className="cp-hue-thumb" style={{ left: (hue / 360 * 100) + '%' }} />
+                  </div>
+                  <div ref={opRef} className="cp-opacity-slider" style={{ '--cp-op-color': hex }} onPointerDown={onOpacityDown}>
+                    <div className="cp-opacity-thumb" style={{ left: opacity + '%' }} />
+                  </div>
+                  <div className="cp-rgb-row">
+                    <label className="cp-rgb-field">
+                      <span>R</span>
+                      <input type="number" min="0" max="255" value={rgb.r} onChange={(e) => applyRgbField('r', e.target.value)} />
+                    </label>
+                    <label className="cp-rgb-field">
+                      <span>G</span>
+                      <input type="number" min="0" max="255" value={rgb.g} onChange={(e) => applyRgbField('g', e.target.value)} />
+                    </label>
+                    <label className="cp-rgb-field">
+                      <span>B</span>
+                      <input type="number" min="0" max="255" value={rgb.b} onChange={(e) => applyRgbField('b', e.target.value)} />
+                    </label>
+                  </div>
+                </div>
+              )}
+              {tab === 'clear' && (
+                <div className="cp-clear-panel">
+                  <p>Remove the custom text color from the current selection and use the default document color instead.</p>
+                  <button type="button" className="cp-clear-btn" onClick={handleClear}>Clear Color</button>
+                </div>
+              )}
+            </div>
+            {tab !== 'clear' && (
+              <div className="cp-footer">
+                <div className="cp-preview-swatch" style={{ background: previewColor }} />
+                <div className="cp-preview-info">
+                  <div className="cp-preview-hex">{hex.toUpperCase()}</div>
+                  <div className="cp-preview-rgb">RGB {rgb.r}, {rgb.g}, {rgb.b}{opacity < 100 ? ` · ${opacity}%` : ''}</div>
+                </div>
+                <button type="button" className="cp-ok-btn" onClick={handleOk}>OK</button>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     function DescToolbar({ onCmd, onFont, onSize, onColor, activeFormats, onClose }) {
       const [fontOpen, setFontOpen] = useState(false);
       const [sizeOpen, setSizeOpen] = useState(false);
-      const [colorOpen, setColorOpen] = useState(false);
+      const [colorModalOpen, setColorModalOpen] = useState(false);
       const [sizeInput, setSizeInput] = useState(12);
-      const [hexValue, setHexValue] = useState('#0B2E6D');
 
       // Prevents the browser's default mousedown action (which would shift
       // focus off the description field and collapse the text selection)
@@ -1565,16 +1791,7 @@
       // never loses the user's selection.
       const noSteal = (e) => e.preventDefault();
 
-      const closeAllPopups = () => { setFontOpen(false); setSizeOpen(false); setColorOpen(false); };
-
-      const applyHex = () => {
-        let v = (hexValue || '').trim();
-        if (!v.startsWith('#')) v = '#' + v;
-        if (/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test(v)) {
-          onColor(v);
-          setHexValue(v);
-        }
-      };
+      const closeAllPopups = () => { setFontOpen(false); setSizeOpen(false); };
 
       const applySize = (v) => {
         const n = Math.round(Number(v));
@@ -1592,7 +1809,7 @@
                 type="button"
                 className="dt-dd-btn"
                 onMouseDown={noSteal}
-                onClick={() => { setFontOpen((v) => !v); setSizeOpen(false); setColorOpen(false); }}
+                onClick={() => { setFontOpen((v) => !v); setSizeOpen(false); }}
               >
                 Font <span className="dt-caret">▾</span>
               </button>
@@ -1611,7 +1828,7 @@
                 type="button"
                 className="dt-dd-btn"
                 onMouseDown={noSteal}
-                onClick={() => { setSizeOpen((v) => !v); setFontOpen(false); setColorOpen(false); }}
+                onClick={() => { setSizeOpen((v) => !v); setFontOpen(false); }}
               >
                 Size <span className="dt-caret">▾</span>
               </button>
@@ -1652,52 +1869,20 @@
                 type="button"
                 className="dt-btn"
                 onMouseDown={noSteal}
-                onClick={() => { setColorOpen((v) => !v); setFontOpen(false); setSizeOpen(false); }}
+                onClick={() => { setColorModalOpen(true); setFontOpen(false); setSizeOpen(false); }}
                 title="Text color"
               >
                 <IconPalette className="h-[14px] w-[14px]" />
               </button>
-              {colorOpen && (
-                <div className="dt-color-popover">
-                  <div className="dt-color-swatch-row" onMouseDown={noSteal}>
-                    {COLOR_SWATCHES.map((c) => (
-                      <span
-                        key={c.value}
-                        className="dt-color-swatch"
-                        style={{ background: c.value }}
-                        title={c.label}
-                        onClick={() => { onColor(c.value); closeAllPopups(); }}
-                      />
-                    ))}
-                  </div>
-                  <div className="dt-color-custom-row">
-                    {/* The native color input opens the OS's full picker
-                        (spectrum/wheel + hex, depending on platform) — it
-                        necessarily steals focus to do so.
-                        RichDescriptionEditor restores the saved text
-                        selection before applying the chosen color. */}
-                    <input
-                      type="color"
-                      className="dt-color-native"
-                      value={hexValue}
-                      onChange={(e) => { setHexValue(e.target.value); onColor(e.target.value); }}
-                      title="Custom color picker"
-                    />
-                    <input
-                      type="text"
-                      className="dt-color-hex"
-                      value={hexValue}
-                      placeholder="#RRGGBB"
-                      onChange={(e) => setHexValue(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === 'Enter') applyHex(); }}
-                      onBlur={applyHex}
-                    />
-                  </div>
-                  <button type="button" className="dt-close-btn dt-color-apply" onClick={() => { applyHex(); closeAllPopups(); }}>Apply</button>
-                </div>
-              )}
             </div>
           </div>
+          {colorModalOpen && (
+            <ColorPickerModal
+              initialColor={DEFAULT_TEXT_COLOR}
+              onApply={onColor}
+              onClose={() => setColorModalOpen(false)}
+            />
+          )}
         </div>
       );
     }
