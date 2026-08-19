@@ -1105,11 +1105,6 @@
       'This quotation is prepared based on the current site condition. Any variation may affect the final cost.'
     ];
 
-    const footerBadges = [
-      { icon: 'water-drop', label: 'QUALITY WORK' },
-      { icon: 'handshake', label: 'TIMELY SERVICE' }
-    ];
-
     const STORAGE_FIELDS = 'quotation_fields_v1';
     const STORAGE_ITEMS = 'quotation_items_v1';
     const STORAGE_DOCTYPE = 'quotation_doctype_v1';
@@ -1920,7 +1915,7 @@
       };
 
       return (
-        <div className="crop-overlay" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
+        <div className="crop-overlay no-print" onClick={(e) => { if (e.target === e.currentTarget) onCancel(); }}>
           <div className="crop-panel">
             <div style={{ fontWeight: 700, color: '#0B2E6D', fontSize: 14 }}>Crop Image — drag to select area</div>
             <div className="crop-canvas-wrap">
@@ -2353,11 +2348,55 @@ const scopeIcons = {
   wrench: WrenchIcon,
   sparkles: SparklesIcon
 };
+
+function ShieldWaterIcon({ className }) {
+  return (
+    <SvgIcon className={className} fill="currentColor">
+      <path d="M32 4 10 12v18c0 14 9.6 24.4 22 30 12.4-5.6 22-16 22-30V12L32 4Z" />
+      <path d="M32 19s-9 12.5-9 18.5a9 9 0 0 0 18 0C41 31.5 32 19 32 19Z" fill="#0B2E6D" />
+    </SvgIcon>
+  );
+}
+
+function RoofHouseIcon({ className }) {
+  return (
+    <SvgIcon className={className} fill="currentColor">
+      <path d="M32 6 4 30h7v26h13V38h16v18h13V30h7Z" />
+      <path d="M27 40h10v6H27Z" fill="#0B2E6D" />
+    </SvgIcon>
+  );
+}
+
+/* Logo lockup: house outline + overlapping water drop + waves beneath, used
+   in the footer brand strip. Uses its own viewBox (not SvgIcon) so the
+   two-tone brand colors below can be layered directly. */
+function HouseDropLogoIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true" focusable="false" className={className}>
+      <path d="M13 32 30 17 40 25.5 40 52 13 52Z" fill="none" stroke="#6CC3FF" strokeWidth="3.4" strokeLinejoin="round" />
+      <rect x="20" y="40" width="9" height="12" fill="#6CC3FF" opacity="0.9" />
+      <path d="M41 21c0 0-14 15.4-14 24.6a14 14 0 0 0 28 0C55 36.4 41 21 41 21Z" fill="#1A56C4" />
+      <path d="M41 21c0 0-14 15.4-14 24.6a14 14 0 0 0 28 0C55 36.4 41 21 41 21Z" fill="none" stroke="#ffffff" strokeWidth="1.4" opacity="0.55" />
+      <path d="M34 40c0 5 3 7.5 3 7.5" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" opacity="0.75" />
+      <path d="M4 56c6-4.5 12-4.5 18 0s12 4.5 18 0 12-4.5 20 0" fill="none" stroke="#ffffff" strokeWidth="2.2" strokeLinecap="round" opacity="0.9" />
+      <path d="M6 60.5c6-4.5 12-4.5 18 0s12 4.5 18 0 12-4.5 18 0" fill="none" stroke="#6CC3FF" strokeWidth="2.2" strokeLinecap="round" opacity="0.65" />
+    </svg>
+  );
+}
+
 const footerIcons = {
   'water-drop': WaterDropIcon,
   handshake: HandshakeIcon,
-  'shield-check': ShieldCheckIcon
+  'shield-check': ShieldCheckIcon,
+  'shield-water': ShieldWaterIcon,
+  'roof-house': RoofHouseIcon
 };
+
+const footerFeatureBadges = [
+  { icon: 'shield-water', label: 'WATERPROOFING SOLUTIONS', sub: 'Keep Water Out' },
+  { icon: 'roof-house', label: 'ROOF & TERRACE PROTECTION', sub: 'Stronger, Safer, Longer' },
+  { icon: 'shield-check', label: 'EXPERT SERVICE & SUPPORT', sub: 'Your Property, Our Priority' }
+];
 
 function ContactRow({ icon, children }) {
   return (
@@ -2801,36 +2840,50 @@ function TermsAndSignature({ fields, setField, signature, setSignature, stamp, s
 
 function FooterBar() {
   return (
-    <footer className="mt-auto relative flex h-[52px] w-full items-stretch overflow-hidden">
+    <footer className="mt-auto relative flex h-[100px] w-full items-stretch overflow-hidden">
       {/* Full-width SVG background with matching diagonal split (navy left + blue right) */}
       <svg
         className="absolute inset-0 h-full w-full"
-        viewBox="0 0 794 52"
+        viewBox="0 0 794 100"
         preserveAspectRatio="none"
         aria-hidden="true"
         style={{ zIndex: 0 }}
       >
         {/* Dark navy left section – right edge is diagonal to match blue */}
-        <polygon points="0,0 560,0 520,52 0,52" fill="#0B2E6D" />
+        <polygon points="0,0 560,0 520,100 0,100" fill="#0B2E6D" />
         {/* Bright blue Thank You section – left edge diagonal matching the navy */}
-        <polygon points="560,0 794,0 794,52 520,52" fill="#1A56C4" />
+        <polygon points="560,0 794,0 794,100 520,100" fill="#1A56C4" />
       </svg>
 
-      {/* Badges content (sits on navy) */}
-      <ul className="relative z-10 flex h-full flex-1 items-center" style={{ maxWidth: '70%' }}>
-        {footerBadges.map((badge, index) => {
+      {/* Brand lockup (sits on navy) */}
+      <div className="relative z-10 flex h-full w-[195px] shrink-0 items-center gap-[10px] pl-[14px] pr-[8px]">
+        <HouseDropLogoIcon className="h-[46px] w-[46px] shrink-0" />
+        <div className="min-w-0">
+          <p className="whitespace-nowrap leading-tight">
+            <span className="text-[14px] font-extrabold text-white">SADIQ </span>
+            <span className="text-[14px] font-extrabold text-[#6CC3FF]">WATERPROOFING</span>
+          </p>
+          <p className="mt-[1px] whitespace-nowrap text-[9px] font-bold tracking-[0.16em] text-white">SOLUTION</p>
+          <p className="mt-[4px] whitespace-nowrap text-[6px] font-semibold tracking-[0.04em] text-[#a9cdf2]">STRONGER SURFACES | LONGER LIFE</p>
+        </div>
+      </div>
+
+      {/* Feature badges (sits on navy) */}
+      <ul className="relative z-10 flex h-full flex-1 items-stretch border-l border-white/25" style={{ maxWidth: 325 }}>
+        {footerFeatureBadges.map((badge, index) => {
           const Icon = footerIcons[badge.icon];
           return (
             <li
               key={badge.label}
-              className={`flex h-full flex-1 items-center justify-center gap-[6px] px-[8px] text-white ${
-                index !== 0 ? 'border-l border-white/35' : ''
+              className={`flex h-full flex-1 flex-col items-center justify-center gap-[3px] px-[5px] text-center ${
+                index !== 0 ? 'border-l border-white/25' : ''
               }`}
             >
-              <Icon className="h-[18px] w-[18px] shrink-0 text-white" />
-              <span className="whitespace-nowrap text-[11px] font-semibold tracking-[0.03em] text-white">
+              <Icon className="h-[20px] w-[20px] shrink-0 text-white" />
+              <span className="text-[7px] font-bold leading-[1.15] tracking-[0.01em] text-white">
                 {badge.label}
               </span>
+              <span className="text-[6.5px] leading-[1.1] text-[#a9cdf2]">{badge.sub}</span>
             </li>
           );
         })}
@@ -2840,10 +2893,10 @@ function FooterBar() {
       <div
         className="relative z-10 flex h-full w-[250px] shrink-0 flex-col items-center justify-center pl-[20px] pr-[12px] text-center"
       >
-        <p className="font-script text-[20px] font-bold leading-none text-white">
+        <p className="font-script text-[24px] font-bold leading-none text-white">
           Thank You!
         </p>
-        <p className="mt-[3px] font-script text-[11.5px] leading-none text-white">
+        <p className="mt-[4px] font-script text-[13px] leading-none text-white">
           We look forward to working with you.
         </p>
       </div>
