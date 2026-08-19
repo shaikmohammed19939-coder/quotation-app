@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Waterproofing Specialist Quotation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,6 +49,11 @@
       display: flex;
       justify-content: center;
       padding: 24px 12px;
+      /* The editor's app-bar + toolbar are position:fixed and only exist on
+         this screen, so the offset for them belongs here, not on <body> —
+         a global body offset would also push down Home/Waterproofing/
+         Settings, which have no fixed header of their own. */
+      padding-top: calc(var(--appbar-h) + var(--toolbar-h) + 24px);
     }
     @media screen and (max-width: 820px) {
       .sheet-scale {
@@ -346,9 +351,6 @@
       --navy: #0B2E6D;
       --navy-dark: #082250;
       --brandblue: #1A56C4;
-    }
-    html.has-shell body {
-      padding-top: calc(var(--appbar-h) + var(--toolbar-h));
     }
     .app-bar {
       position: fixed;
@@ -829,11 +831,46 @@
       visibility: hidden !important;
     }
 
-    /* ===================== Home screen ===================== */
+    /* ===================== Bottom navigation ===================== */
+    :root { --bottomnav-h: 60px; }
+    .bottom-nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      height: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px));
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      background: #ffffff;
+      border-top: 1px solid #e6eaf2;
+      display: flex;
+      align-items: stretch;
+      z-index: 900;
+      box-shadow: 0 -2px 10px rgba(11,46,109,0.08);
+    }
+    .bottom-nav-btn {
+      -webkit-tap-highlight-color: transparent;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      border: none;
+      background: transparent;
+      color: #94a3b8;
+      font-family: Montserrat, sans-serif;
+      font-size: 10.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 120ms ease;
+    }
+    .bottom-nav-btn.active { color: var(--navy); }
+    .bottom-nav-btn:active { background: #f2f5fb; }
+    .bottom-nav-btn svg { width: 21px; height: 21px; }
+
+    /* ===================== Home / list screens ===================== */
     .home-screen {
       min-height: 100vh;
       background: #eef1f7;
-      padding-bottom: 32px;
+      padding-bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0px) + 20px);
       animation: fade-in 220ms ease;
     }
     .home-header {
@@ -918,6 +955,40 @@
     }
     .home-empty-icon { font-size: 40px; margin-bottom: 10px; }
 
+    /* ===================== Settings screen (bottom-nav) ===================== */
+    .settings-profile-card {
+      display: flex; align-items: center; gap: 12px;
+      background: #fff; border-radius: 14px; padding: 14px 16px;
+      box-shadow: 0 2px 12px rgba(11,46,109,0.08);
+      cursor: pointer;
+    }
+    .settings-profile-avatar {
+      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--brandblue), var(--navy));
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-family: Montserrat, sans-serif; font-weight: 800; font-size: 18px;
+    }
+    .settings-profile-name { font-family: Montserrat, sans-serif; font-weight: 700; font-size: 14px; color: #1d2939; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .settings-profile-tagline { font-family: Montserrat, sans-serif; font-size: 11.5px; color: #94a3b8; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .settings-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      box-shadow: 0 2px 12px rgba(11,46,109,0.06);
+    }
+    .settings-card h4 {
+      margin: 0 0 6px;
+      font-family: Montserrat, sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--brandblue);
+      letter-spacing: 0.06em;
+    }
+    .settings-card .settings-row:last-child { border-bottom: none; }
+    body.dark-editor .settings-profile-card, body.dark-editor .settings-card { background: #1a2333; }
+    body.dark-editor .settings-profile-name { color: #dfe6f5; }
+
     /* ===================== Layout Edit Mode ===================== */
     .layout-editing { outline: 2px dashed #1A56C4; cursor: grab; }
     .layout-editing:active { cursor: grabbing; }
@@ -989,13 +1060,14 @@
     const { useState, useRef, useEffect, useCallback } = React;
 
     // Full company name
-    const company = {
+    const DEFAULT_COMPANY = {
       name: 'SHAIK SADIQ ALI ANWAR',
       tagline: 'WATERPROOFING SPECIALIST',
       phone: '+91 9182650939',
       email: 'sadiqshaik3233@gmail.com',
       address: ['Plot No. 33, Shivaji Nagar', 'Nagar Govindi Shivaji Nagar,', 'Mumbai, Maharashtra']
     };
+    const COMPANY_PROFILE_KEY = 'company_profile_v1';
 
     const customerFields = [
       { label: 'Client Name', lines: 1, key: 'clientName' },
@@ -1142,6 +1214,22 @@
       await idbSet(QUOTATIONS_INDEX_KEY, list);
     }
 
+    // Every mutation of QUOTATIONS_INDEX_KEY does an unavoidable
+    // read-then-write round trip (IndexedDB has no atomic "upsert into
+    // array" primitive). Autosave, an explicit Save tap, a layout drag, and
+    // Create can all fire close together — without serialization, two
+    // overlapping read-modify-write cycles can race and clobber each
+    // other's update or, worse, both decide the id is "new" and each add
+    // their own entry, producing duplicate cards on Home for what was a
+    // single quotation. Funnelling every index mutation through this queue
+    // makes them strictly sequential so that can't happen.
+    let indexOpQueue = Promise.resolve();
+    function queueIndexOp(fn) {
+      const run = indexOpQueue.then(fn, fn);
+      indexOpQueue = run.then(() => {}, () => {});
+      return run;
+    }
+
     function summarizeDoc(id, doc) {
       const fields = doc.fields || {};
       const name = fields.clientName
@@ -1160,20 +1248,24 @@
       };
     }
 
-    async function upsertIndexEntry(id, doc) {
-      const list = await loadQuotationIndex();
-      const summary = summarizeDoc(id, doc);
-      const i = list.findIndex((q) => q.id === id);
-      if (i >= 0) list[i] = summary; else list.unshift(summary);
-      await saveQuotationIndex(list);
-      return list;
+    function upsertIndexEntry(id, doc) {
+      return queueIndexOp(async () => {
+        const list = await loadQuotationIndex();
+        const summary = summarizeDoc(id, doc);
+        const i = list.findIndex((q) => q.id === id);
+        if (i >= 0) list[i] = summary; else list.unshift(summary);
+        await saveQuotationIndex(list);
+        return list;
+      });
     }
 
-    async function removeIndexEntry(id) {
-      const list = await loadQuotationIndex();
-      const next = list.filter((q) => q.id !== id);
-      await saveQuotationIndex(next);
-      return next;
+    function removeIndexEntry(id) {
+      return queueIndexOp(async () => {
+        const list = await loadQuotationIndex();
+        const next = list.filter((q) => q.id !== id);
+        await saveQuotationIndex(next);
+        return next;
+      });
     }
 
     function blankQuotationDoc() {
@@ -1195,6 +1287,10 @@
     async function createNewQuotation() {
       const id = makeQuotationId();
       const doc = blankQuotationDoc();
+      const prefs = (await idbGet(PREFS_KEY)) || loadJSON(PREFS_KEY, null);
+      if (prefs && prefs.defaultTableSettings) {
+        doc.tableSettings = { ...DEFAULT_TABLE_SETTINGS, ...prefs.defaultTableSettings };
+      }
       await idbSet(quotationDocKey(id), doc);
       await upsertIndexEntry(id, doc);
       return id;
@@ -1362,6 +1458,7 @@
     );
     const IconShare = (p) => <IconSvg {...p} d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .05 3.9L8.91 11.6a3 3 0 1 0 0 4.8l6.14 3.7A3 3 0 1 0 18 16a3 3 0 0 0-2.09.85L9.77 13.2a3 3 0 0 0 0-2.4l6.14-3.65A3 3 0 0 0 18 8Z" fill="currentColor" stroke="none" />;
     const IconSettingsGear = (p) => <SettingsSvg {...p} />;
+    const IconHome = (p) => <IconSvg {...p} d="M3 11.5 12 4l9 7.5M5 10v10h5v-6h4v6h5V10" />;
     const IconDuplicate = (p) => <IconSvg {...p} d="M9 9h10v10H9zM5 5h10v4H9v6H5z" />;
     const IconUp = (p) => <IconSvg {...p} d="m18 15-6-6-6 6" />;
     const IconDown = (p) => <IconSvg {...p} d="m6 9 6 6 6-6" />;
@@ -2273,7 +2370,8 @@ function ContactRow({ icon, children }) {
   );
 }
 
-function QuotationHeader({ fields, setField, docType, setDocType, logo, setLogo }) {
+function QuotationHeader({ fields, setField, docType, setDocType, logo, setLogo, company }) {
+  const co = company || DEFAULT_COMPANY;
   const titleText = docType === 'bill' ? 'BILL' : 'QUOTATION';
   const noLabel = docType === 'bill' ? 'Bill No.' : 'Quotation No.';
   return (
@@ -2289,16 +2387,16 @@ function QuotationHeader({ fields, setField, docType, setDocType, logo, setLogo 
         </div>
         <div className="min-w-0 flex-1 self-stretch border-l-[3px] border-navy pl-[12px] pt-[6px] overflow-hidden">
           <h1 className="text-[26px] font-extrabold leading-[30px] tracking-[-0.4px] text-navy break-words">
-            {company.name}
+            {co.name}
           </h1>
           <p className="mt-[4px] inline-block border-b-[2.5px] border-brandblue pb-[4px] text-[13px] font-bold tracking-[0.05em] text-brandblue">
-            {company.tagline}
+            {co.tagline}
           </p>
           <ul className="mt-[10px] space-y-[6px]">
-            <ContactRow icon={<PhoneSvg />}>{company.phone}</ContactRow>
-            <ContactRow icon={<MailSvg />}>{company.email}</ContactRow>
+            <ContactRow icon={<PhoneSvg />}>{co.phone}</ContactRow>
+            <ContactRow icon={<MailSvg />}>{co.email}</ContactRow>
             <ContactRow icon={<MapPinSvg />}>
-              {company.address.map((line) => (
+              {co.address.map((line) => (
                 <span key={line} className="block">{line}</span>
               ))}
             </ContactRow>
@@ -3035,6 +3133,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
   const [pdfNameDraft, setPdfNameDraft] = useState('');
   const [layoutEditEnabled, setLayoutEditEnabled] = useState(false);
   const [layout, setLayoutRaw] = useState({});
+  const [companyProfile, setCompanyProfile] = useState({ ...DEFAULT_COMPANY });
 
   const totalAutoRef = useRef(true);
   const pdfBlobRef = useRef(null);
@@ -3286,6 +3385,8 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         if (prefs.defaults) setDefaultsRaw((d) => ({ ...d, ...prefs.defaults }));
         if (prefs.appearance) setAppearance((a) => ({ ...a, ...prefs.appearance }));
       }
+      const savedCompany = await idbGet(COMPANY_PROFILE_KEY);
+      if (!cancelled && savedCompany) setCompanyProfile((c) => ({ ...c, ...savedCompany }));
       historyRef.current = { past: [], future: [] };
       pendingBaselineRef.current = null;
       setCanUndo(false);
@@ -3732,7 +3833,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         <div className="sheet-scale">
           <main className="sheet flex flex-col overflow-hidden border border-navy/20 shadow-sheet">
             <LayoutSection id="header" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Header">
-              <QuotationHeader fields={fields} setField={setField} docType={docType} setDocType={setDocType} logo={images.logo} setLogo={setLogo} />
+              <QuotationHeader fields={fields} setField={setField} docType={docType} setDocType={setDocType} logo={images.logo} setLogo={setLogo} company={companyProfile} />
             </LayoutSection>
             <LayoutSection id="details" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Customer & Work Details">
               <DetailsSection fields={fields} setField={setField} />
@@ -3798,6 +3899,75 @@ function QuotationCard({ q, onOpen, onDuplicate, onDelete, onShare }) {
   );
 }
 
+function CompanyProfileModal({ open, onClose, company, onSave }) {
+  const [draft, setDraft] = useState(company);
+  useEffect(() => { if (open) setDraft(company); }, [open, company]);
+  if (!open) return null;
+  const set = (k, v) => setDraft((d) => ({ ...d, [k]: v }));
+  return (
+    <div className="modal-overlay no-print" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-sheet">
+        <div className="modal-header">
+          <h3>Edit Company Profile</h3>
+          <button type="button" className="icon-btn ripple-surface" onClick={onClose} title="Close"><IconClose className="h-[18px] w-[18px]" /></button>
+        </div>
+        <div className="modal-body">
+          <div className="settings-group">
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>Company Name</label>
+            <input type="text" value={draft.name} onChange={(e) => set('name', e.target.value)} style={{ width: '100%', marginTop: 6, marginBottom: 12, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 13, fontFamily: 'Montserrat, sans-serif', boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>Tagline</label>
+            <input type="text" value={draft.tagline} onChange={(e) => set('tagline', e.target.value)} style={{ width: '100%', marginTop: 6, marginBottom: 12, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 13, fontFamily: 'Montserrat, sans-serif', boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>Phone</label>
+            <input type="text" value={draft.phone} onChange={(e) => set('phone', e.target.value)} style={{ width: '100%', marginTop: 6, marginBottom: 12, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 13, fontFamily: 'Montserrat, sans-serif', boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>Email</label>
+            <input type="text" value={draft.email} onChange={(e) => set('email', e.target.value)} style={{ width: '100%', marginTop: 6, marginBottom: 12, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 13, fontFamily: 'Montserrat, sans-serif', boxSizing: 'border-box' }} />
+            <label style={{ fontSize: 11.5, fontWeight: 700, color: '#0B2E6D', fontFamily: 'Montserrat, sans-serif' }}>Address (one line each)</label>
+            <textarea
+              value={draft.address.join('\n')}
+              onChange={(e) => set('address', e.target.value.split('\n'))}
+              rows={3}
+              style={{ width: '100%', marginTop: 6, marginBottom: 4, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 13, fontFamily: 'Montserrat, sans-serif', boxSizing: 'border-box', resize: 'vertical' }}
+            />
+            <div style={{ display: 'flex', gap: 12, marginTop: 14 }}>
+              <button
+                type="button"
+                className="upload-btn"
+                style={{ fontWeight: 700 }}
+                onClick={() => { onSave({ ...draft, address: draft.address.filter((l) => l.trim() !== '') }); onClose(); }}
+              >
+                Save Profile
+              </button>
+              <button type="button" className="upload-btn" onClick={onClose}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AppInfoModal({ open, onClose }) {
+  if (!open) return null;
+  return (
+    <div className="modal-overlay no-print" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-sheet" style={{ maxWidth: 360 }}>
+        <div className="modal-header">
+          <h3>App Information</h3>
+          <button type="button" className="icon-btn ripple-surface" onClick={onClose} title="Close"><IconClose className="h-[18px] w-[18px]" /></button>
+        </div>
+        <div className="modal-body" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+          <p style={{ fontWeight: 800, fontSize: 15, color: '#0B2E6D', margin: '0 0 2px' }}>Quotation App</p>
+          <p style={{ fontSize: 12, color: '#667085', margin: '0 0 14px' }}>Professional Quotation &amp; Bill Maker · v1.0</p>
+          <p style={{ fontSize: 12.5, color: '#333', lineHeight: 1.6, margin: 0 }}>
+            A mobile-first quotation and bill editor with rich-text descriptions, multi-page PDF export,
+            and offline-first storage — every quotation is saved on this device using IndexedDB.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DataPanel({ open, onClose }) {
   const [status, setStatus] = useState('');
   if (!open) return null;
@@ -3836,14 +4006,18 @@ function DataPanel({ open, onClose }) {
       try {
         const payload = JSON.parse(reader.result);
         if (!payload || !payload.docs) throw new Error('invalid file');
-        const existing = await loadQuotationIndex();
-        const byId = {};
-        existing.forEach((q) => { byId[q.id] = q; });
         for (const id of Object.keys(payload.docs)) {
           await idbSet(quotationDocKey(id), payload.docs[id]);
-          byId[id] = summarizeDoc(id, payload.docs[id]);
         }
-        await saveQuotationIndex(Object.values(byId));
+        await queueIndexOp(async () => {
+          const existing = await loadQuotationIndex();
+          const byId = {};
+          existing.forEach((q) => { byId[q.id] = q; });
+          for (const id of Object.keys(payload.docs)) {
+            byId[id] = summarizeDoc(id, payload.docs[id]);
+          }
+          await saveQuotationIndex(Object.values(byId));
+        });
         setStatus('Restore complete ✓ — go back to Home to see it.');
       } catch (err) {
         setStatus('That file could not be read as a backup.');
@@ -3857,7 +4031,7 @@ function DataPanel({ open, onClose }) {
     if (!window.confirm('Delete ALL quotations from this device? This cannot be undone.')) return;
     const index = await loadQuotationIndex();
     for (const q of index) await idbDelete(quotationDocKey(q.id));
-    await saveQuotationIndex([]);
+    await queueIndexOp(() => saveQuotationIndex([]));
     setStatus('All quotations cleared.');
   };
 
@@ -3897,11 +4071,222 @@ function DataPanel({ open, onClose }) {
   );
 }
 
-function Home({ onOpen, onCreate, onShare }) {
+function SettingsScreen() {
+  const [defaults, setDefaultsRaw] = useState({ font: '"Montserrat", Arial, sans-serif', size: 12, color: '#0B2E6D', align: 'left', pdfFormat: 'number_client' });
+  const [appearance, setAppearance] = useState({ dark: false });
+  const [defaultTableSettings, setDefaultTableSettingsRaw] = useState({ ...DEFAULT_TABLE_SETTINGS });
+  const [company, setCompany] = useState({ ...DEFAULT_COMPANY });
+  const [loaded, setLoaded] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [appInfoOpen, setAppInfoOpen] = useState(false);
+  const [dataPanelOpen, setDataPanelOpen] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const prefs = (await idbGet(PREFS_KEY)) || loadJSON(PREFS_KEY, null);
+      if (prefs) {
+        if (prefs.defaults) setDefaultsRaw((d) => ({ ...d, ...prefs.defaults }));
+        if (prefs.appearance) setAppearance((a) => ({ ...a, ...prefs.appearance }));
+        if (prefs.defaultTableSettings) setDefaultTableSettingsRaw((t) => ({ ...t, ...prefs.defaultTableSettings }));
+      }
+      const savedCompany = await idbGet(COMPANY_PROFILE_KEY);
+      if (savedCompany) setCompany((c) => ({ ...c, ...savedCompany }));
+      setLoaded(true);
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    const payload = { defaults, appearance, defaultTableSettings };
+    idbSet(PREFS_KEY, payload);
+    saveJSON(PREFS_KEY, payload);
+  }, [defaults, appearance, defaultTableSettings, loaded]);
+
+  useEffect(() => {
+    document.body.classList.toggle('dark-editor', !!appearance.dark);
+  }, [appearance.dark]);
+
+  const saveCompany = (next) => {
+    setCompany(next);
+    idbSet(COMPANY_PROFILE_KEY, next);
+  };
+
+  const tableOptions = [
+    ['showSerial', 'Serial Number'],
+    ['showDescription', 'Description'],
+    ['showUnit', 'Unit'],
+    ['showQty', 'Quantity'],
+    ['showRate', 'Rate'],
+    ['showAmount', 'Amount'],
+    ['showBorders', 'Table Borders'],
+    ['compactRows', 'Compact Rows']
+  ];
+
+  return (
+    <div className="home-screen">
+      <div className="home-header">
+        <div>
+          <div className="home-title">QUOTATION APP</div>
+          <div className="home-subtitle">Settings</div>
+        </div>
+      </div>
+
+      <div style={{ padding: '16px 16px 0' }}>
+        <div className="settings-profile-card" onClick={() => setProfileOpen(true)}>
+          <div className="settings-profile-avatar">{(company.name || '?').trim().charAt(0)}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="settings-profile-name">{company.name}</div>
+            <div className="settings-profile-tagline">{company.tagline}</div>
+          </div>
+          <IconSvg d="m9 18 6-6-6-6" className="h-[16px] w-[16px] text-slate-400" />
+        </div>
+      </div>
+
+      <div style={{ padding: '0 16px' }}>
+        <div className="settings-card">
+          <h4>PROFILE</h4>
+          <div className="settings-row" onClick={() => setProfileOpen(true)} style={{ cursor: 'pointer' }}>
+            <span>Edit Company Profile</span>
+            <IconSvg d="m9 18 6-6-6-6" className="h-[14px] w-[14px] text-slate-400" />
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>GENERAL</h4>
+          <div className="settings-row">
+            <span>Dark Editor (printed PDF always stays light)</span>
+            <label className="switch">
+              <input type="checkbox" checked={!!appearance.dark} onChange={(e) => setAppearance((a) => ({ ...a, dark: e.target.checked }))} />
+              <span className="slider" />
+            </label>
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>EDITOR DEFAULTS (new quotations)</h4>
+          <div className="settings-row">
+            <span>Rich Text Formatting</span>
+            <label className="switch">
+              <input type="checkbox" checked={defaultTableSettings.richTextEnabled !== false} onChange={(e) => setDefaultTableSettingsRaw((t) => ({ ...t, richTextEnabled: e.target.checked }))} />
+              <span className="slider" />
+            </label>
+          </div>
+          <div className="settings-row">
+            <span>Default Font</span>
+            <select value={defaults.font} onChange={(e) => setDefaultsRaw((d) => ({ ...d, font: e.target.value }))}>
+              {FONT_FAMILIES.map((f) => <option key={f.label} value={f.value}>{f.label}</option>)}
+            </select>
+          </div>
+          <div className="settings-row">
+            <span>Default Size</span>
+            <select value={defaults.size} onChange={(e) => setDefaultsRaw((d) => ({ ...d, size: Number(e.target.value) }))}>
+              {FONT_SIZES.map((s) => <option key={s} value={s}>{s} pt</option>)}
+            </select>
+          </div>
+          <div className="settings-row">
+            <span>Default Color</span>
+            <input type="color" value={defaults.color} onChange={(e) => setDefaultsRaw((d) => ({ ...d, color: e.target.value }))} />
+          </div>
+          <div className="settings-row">
+            <span>Default Alignment</span>
+            <select value={defaults.align} onChange={(e) => setDefaultsRaw((d) => ({ ...d, align: e.target.value }))}>
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>TABLE DEFAULTS (new quotations)</h4>
+          {tableOptions.map(([key, label]) => (
+            <div className="settings-row" key={key}>
+              <span>{label}</span>
+              <label className="switch">
+                <input type="checkbox" checked={!!defaultTableSettings[key]} onChange={(e) => setDefaultTableSettingsRaw((t) => ({ ...t, [key]: e.target.checked }))} />
+                <span className="slider" />
+              </label>
+            </div>
+          ))}
+        </div>
+
+        <div className="settings-card">
+          <h4>PDF</h4>
+          <div className="settings-row">
+            <span>Page Size</span>
+            <span style={{ color: '#667085', fontSize: 12.5 }}>A4</span>
+          </div>
+          <div className="settings-row">
+            <span>Default Filename</span>
+            <select value={defaults.pdfFormat || 'number_client'} onChange={(e) => setDefaultsRaw((d) => ({ ...d, pdfFormat: e.target.value }))}>
+              <option value="number_client">Number + Client</option>
+              <option value="number">Quotation Number only</option>
+              <option value="client">Client Name only</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>LAYOUT EDITOR</h4>
+          <p style={{ fontSize: 12, color: '#667085', fontFamily: 'Montserrat, sans-serif', margin: 0 }}>
+            Open any quotation and use its own Settings (⚙ in the editor toolbar) to turn on Layout Edit Mode,
+            drag sections to reposition them, and reset the layout — positions are saved per quotation.
+          </p>
+        </div>
+
+        <div className="settings-card">
+          <h4>DATA</h4>
+          <div className="settings-row" onClick={() => setDataPanelOpen(true)} style={{ cursor: 'pointer' }}>
+            <span>Backup, Restore &amp; Clear Data</span>
+            <IconSvg d="m9 18 6-6-6-6" className="h-[14px] w-[14px] text-slate-400" />
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>APP</h4>
+          <div className="settings-row" onClick={() => setAppInfoOpen(true)} style={{ cursor: 'pointer' }}>
+            <span>App Information</span>
+            <IconSvg d="m9 18 6-6-6-6" className="h-[14px] w-[14px] text-slate-400" />
+          </div>
+        </div>
+      </div>
+
+      <CompanyProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} company={company} onSave={saveCompany} />
+      <AppInfoModal open={appInfoOpen} onClose={() => setAppInfoOpen(false)} />
+      <DataPanel open={dataPanelOpen} onClose={() => setDataPanelOpen(false)} />
+    </div>
+  );
+}
+
+function BottomNav({ activeTab, onNavigate }) {
+  const tabs = [
+    { key: 'home', label: 'Home', icon: IconHome },
+    { key: 'waterproofing', label: 'Waterproofing', icon: WaterDropIcon },
+    { key: 'settings', label: 'Settings', icon: IconSettingsGear }
+  ];
+  return (
+    <nav className="bottom-nav no-print">
+      {tabs.map((t) => (
+        <button
+          key={t.key}
+          type="button"
+          className={`bottom-nav-btn ripple-surface ${activeTab === t.key ? 'active' : ''}`}
+          onClick={() => onNavigate(t.key)}
+        >
+          <t.icon className="h-[21px] w-[21px]" />
+          <span>{t.label}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function QuotationListScreen({ variant, onOpen, onCreate, onShare }) {
+  const isWP = variant === 'waterproofing';
   const [index, setIndex] = useState(null);
   const [search, setSearch] = useState('');
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [dataPanelOpen, setDataPanelOpen] = useState(false);
+  const creatingRef = useRef(false);
 
   const refresh = async () => {
     const list = await loadQuotationIndex();
@@ -3919,9 +4304,18 @@ function Home({ onOpen, onCreate, onShare }) {
       (q.clientName || '').toLowerCase().includes(s);
   });
 
+  // Guarded against rapid double-taps: each call genuinely mints a new
+  // quotation id, so an accidental second tap before the first navigation
+  // completes would otherwise create two records from one intended tap.
   const handleCreate = async () => {
-    const id = await createNewQuotation();
-    onCreate(id);
+    if (creatingRef.current) return;
+    creatingRef.current = true;
+    try {
+      const id = await createNewQuotation();
+      onCreate(id);
+    } finally {
+      creatingRef.current = false;
+    }
   };
 
   const handleDuplicate = async (id) => {
@@ -3936,16 +4330,15 @@ function Home({ onOpen, onCreate, onShare }) {
     await refresh();
   };
 
+  const createLabel = isWP ? 'New Waterproofing Quotation' : 'Create New Quotation';
+
   return (
     <div className="home-screen">
       <div className="home-header">
         <div>
-          <div className="home-title">QUOTATION APP</div>
-          <div className="home-subtitle">Professional Quotation &amp; Bill Maker</div>
+          <div className="home-title">{isWP ? 'WATERPROOFING' : 'QUOTATION APP'}</div>
+          <div className="home-subtitle">{isWP ? 'Waterproofing quotations & bills' : 'Professional Quotation & Bill Maker'}</div>
         </div>
-        <button type="button" className="icon-btn ripple-surface" title="Backup &amp; Data" onClick={() => setDataPanelOpen(true)} style={{ color: '#fff' }}>
-          <IconSettingsGear className="h-[20px] w-[20px]" />
-        </button>
       </div>
 
       <div className="home-search-wrap">
@@ -3960,23 +4353,38 @@ function Home({ onOpen, onCreate, onShare }) {
         </div>
       </div>
 
-      <div className="home-create-wrap">
-        <button type="button" className="home-create-btn ripple-surface" onClick={handleCreate}>
-          <IconAddRow className="h-[18px] w-[18px]" />
-          Create New Quotation
-        </button>
-      </div>
+      {(!isWP || index === null || filtered.length > 0 || search.trim()) && (
+        <div className="home-create-wrap">
+          <button type="button" className="home-create-btn ripple-surface" onClick={handleCreate}>
+            <IconAddRow className="h-[18px] w-[18px]" />
+            {createLabel}
+          </button>
+        </div>
+      )}
 
-      <div className="home-section-label">
-        {search.trim() ? `Results (${filtered.length})` : `Your Quotations (${filtered.length})`}
-      </div>
+      {index !== null && filtered.length > 0 && (
+        <div className="home-section-label">
+          {search.trim() ? `Results (${filtered.length})` : `Your Quotations (${filtered.length})`}
+        </div>
+      )}
 
       {index === null ? (
         <div className="home-empty">Loading…</div>
       ) : filtered.length === 0 ? (
         <div className="home-empty">
-          <div className="home-empty-icon">📄</div>
-          {search.trim() ? 'No quotations match your search.' : 'No quotations yet. Tap "Create New Quotation" to get started.'}
+          <div className="home-empty-icon">{isWP ? '💧' : '📄'}</div>
+          {isWP && !search.trim() ? (
+            <>
+              <p style={{ fontWeight: 700, color: '#1d2939', fontSize: 14, margin: '0 0 4px' }}>No Waterproofing Quotations</p>
+              <p style={{ margin: '0 0 16px' }}>Create your first waterproofing quotation</p>
+              <button type="button" className="home-create-btn ripple-surface" style={{ maxWidth: 280, margin: '0 auto' }} onClick={handleCreate}>
+                <IconAddRow className="h-[16px] w-[16px]" />
+                {createLabel}
+              </button>
+            </>
+          ) : (
+            search.trim() ? 'No quotations match your search.' : 'No quotations yet. Tap "Create New Quotation" to get started.'
+          )}
         </div>
       ) : (
         <div className="home-card-list">
@@ -4011,15 +4419,14 @@ function Home({ onOpen, onCreate, onShare }) {
           </div>
         </div>
       )}
-
-      <DataPanel open={dataPanelOpen} onClose={() => setDataPanelOpen(false)} />
     </div>
   );
 }
 
 function Root() {
   const [ready, setReady] = useState(false);
-  const [screen, setScreen] = useState('home');
+  const [activeTab, setActiveTab] = useState('home');
+  const [inEditor, setInEditor] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [pendingShare, setPendingShare] = useState(false);
 
@@ -4031,26 +4438,35 @@ function Root() {
     })();
   }, []);
 
-  const goHome = () => { setScreen('home'); setActiveId(null); setPendingShare(false); };
-  const openQuotation = (id) => { setActiveId(id); setPendingShare(false); setScreen('editor'); };
-  const createQuotation = (id) => { setActiveId(id); setPendingShare(false); setScreen('editor'); };
-  const shareQuotation = (id) => { setActiveId(id); setPendingShare(true); setScreen('editor'); };
+  // Returning from the editor goes back to whichever tab (Home or
+  // Waterproofing) the user opened it from, not always Home.
+  const exitEditor = () => { setInEditor(false); setActiveId(null); setPendingShare(false); };
+  const openQuotation = (id) => { setActiveId(id); setPendingShare(false); setInEditor(true); };
+  const createQuotation = (id) => { setActiveId(id); setPendingShare(false); setInEditor(true); };
+  const shareQuotation = (id) => { setActiveId(id); setPendingShare(true); setInEditor(true); };
 
   if (!ready) return null;
 
-  if (screen === 'editor' && activeId) {
+  if (inEditor && activeId) {
     return (
       <Editor
         key={activeId}
         quotationId={activeId}
-        onExitToHome={goHome}
+        onExitToHome={exitEditor}
         pendingShare={pendingShare}
         onConsumePendingShare={() => setPendingShare(false)}
       />
     );
   }
 
-  return <Home onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />;
+  return (
+    <>
+      {activeTab === 'home' && <QuotationListScreen variant="home" onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />}
+      {activeTab === 'waterproofing' && <QuotationListScreen variant="waterproofing" onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />}
+      {activeTab === 'settings' && <SettingsScreen />}
+      <BottomNav activeTab={activeTab} onNavigate={setActiveTab} />
+    </>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(<Root />);
