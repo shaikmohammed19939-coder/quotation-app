@@ -3534,8 +3534,35 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       });
       await new Promise((r) => setTimeout(r, 100));
 
-      const canvas = await html2canvas(sheet, {
-        scale: 2.5,
+      const CANVAS_SCALE = 2.5;
+      const sheetRectCss = sheet.getBoundingClientRect();
+      const sheetWidthCss = Math.ceil(sheetRectCss.width);
+      const sheetHeightCss = Math.ceil(sheet.scrollHeight);
+
+      // Measure the footer's own true rendered box (not "everything below its
+      // top edge") because .sheet carries `min-height: 297mm` so short
+      // documents render extra blank filler AFTER the footer, which must be
+      // discarded rather than treated as part of the footer or trailing body.
+      const footerElLive = sheet.querySelector('footer');
+      let footerTopCss = sheetHeightCss;
+      let footerBottomCss = sheetHeightCss;
+      if (footerElLive) {
+        const footerRect = footerElLive.getBoundingClientRect();
+        footerTopCss = footerRect.top - sheetRectCss.top;
+        footerBottomCss = footerRect.bottom - sheetRectCss.top;
+      }
+      footerTopCss = Math.min(Math.max(0, footerTopCss), sheetHeightCss);
+      footerBottomCss = Math.min(Math.max(footerTopCss, footerBottomCss), sheetHeightCss);
+      const bodyHeightCss = footerTopCss;
+      const footerHeightCss = footerBottomCss - footerTopCss;
+
+      // Capture the document in per-page bands rather than one giant canvas.
+      // A single html2canvas call spanning hundreds of rows can exceed the
+      // browser's canvas raster limits and silently return blank/corrupted
+      // image data (no error thrown) — tiling keeps every captured canvas
+      // at most one A4 page tall regardless of how long the document is.
+      const captureBand = (yCss, hCss) => html2canvas(sheet, {
+        scale: CANVAS_SCALE,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#ffffff',
@@ -3543,9 +3570,9 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         scrollX: 0,
         scrollY: -window.scrollY,
         x: 0,
-        y: 0,
-        width: Math.ceil(sheet.getBoundingClientRect().width),
-        height: Math.ceil(sheet.scrollHeight),
+        y: yCss,
+        width: sheetWidthCss,
+        height: Math.max(1, Math.ceil(hCss)),
         onclone: (doc) => {
           const clonedSheet = doc.querySelector('.sheet');
           if (clonedSheet) {
@@ -3625,7 +3652,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         }
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.98);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
 
@@ -3634,34 +3660,78 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       const margin = 1.5;
       const maxW = pageW - margin * 2;
       const maxH = pageH - margin * 2;
-      const fitRatio = maxW / canvas.width;
-      const naturalImgH = canvas.height * fitRatio;
+      const imgW = maxW;
+      const pxPerMm = sheetWidthCss / pageW;
 
-      if (naturalImgH <= maxH) {
-        const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
-        const imgW = canvas.width * ratio;
-        const imgH = canvas.height * ratio;
-        pdf.addImage(imgData, 'JPEG', (pageW - imgW) / 2, margin, imgW, imgH, undefined, 'MEDIUM');
-      } else {
-        // Content taller than one A4 page: split into real multiple pages
-        // instead of shrinking everything down to fit.
-        const imgW = maxW;
-        const pageSlicePx = Math.max(1, Math.floor(maxH / fitRatio));
-        let renderedY = 0;
-        let first = true;
-        while (renderedY < canvas.height) {
-          const sliceH = Math.min(pageSlicePx, canvas.height - renderedY);
-          const pageCanvas = document.createElement('canvas');
-          pageCanvas.width = canvas.width;
-          pageCanvas.height = sliceH;
-          const ctx = pageCanvas.getContext('2d');
-          ctx.drawImage(canvas, 0, renderedY, canvas.width, sliceH, 0, 0, canvas.width, sliceH);
+      // Slice an already-captured canvas in memory (cheap — no re-render).
+      const sliceCanvas = (source, y0, y1) => {
+        const c = document.createElement('canvas');
+        c.width = source.width;
+        c.height = y1 - y0;
+        c.getContext('2d').drawImage(source, 0, y0, source.width, y1 - y0, 0, 0, source.width, y1 - y0);
+        return c;
+      };
+
+      // Paginate the body (everything above the footer) across as many real
+      // A4 pages as it needs, with no shrinking. Each html2canvas capture is
+      // kept well under the browser's canvas raster limits (a single capture
+      // spanning hundreds of rows can silently return blank/corrupted image
+      // data with no error) — but capturing one page at a time is far too
+      // slow for long documents (html2canvas re-clones the whole DOM on every
+      // call), so each capture batches as many pages as safely fit into one
+      // raster, then those pages are split apart with cheap in-memory
+      // canvas cropping instead of additional html2canvas calls.
+      const pageSliceCss = Math.max(1, Math.floor(maxH * pxPerMm));
+      const SAFE_TILE_CANVAS_PX = 20000;
+      const pagesPerTile = Math.max(1, Math.floor(SAFE_TILE_CANVAS_PX / (CANVAS_SCALE * pageSliceCss)));
+      const tileCssHeight = pagesPerTile * pageSliceCss;
+
+      let renderedY = 0;
+      let pagesDrawn = 0;
+      let lastSliceHmm = 0;
+      let fitRatio = null;
+      while (renderedY < bodyHeightCss) {
+        const tileH = Math.min(tileCssHeight, bodyHeightCss - renderedY);
+        const tileCanvas = await captureBand(renderedY, tileH);
+        if (fitRatio === null) fitRatio = maxW / tileCanvas.width;
+        const pageSliceCanvasPx = Math.max(1, Math.round(pageSliceCss * (tileCanvas.width / sheetWidthCss)));
+        let ty = 0;
+        while (ty < tileCanvas.height) {
+          const sh = Math.min(pageSliceCanvasPx, tileCanvas.height - ty);
+          const pageCanvas = sliceCanvas(tileCanvas, ty, ty + sh);
           const sliceData = pageCanvas.toDataURL('image/jpeg', 0.98);
-          if (!first) pdf.addPage();
-          pdf.addImage(sliceData, 'JPEG', (pageW - imgW) / 2, margin, imgW, sliceH * fitRatio, undefined, 'MEDIUM');
-          renderedY += sliceH;
-          first = false;
+          const sliceHmm = pageCanvas.height * fitRatio;
+          if (pagesDrawn > 0) pdf.addPage();
+          pdf.addImage(sliceData, 'JPEG', (pageW - imgW) / 2, margin, imgW, sliceHmm, undefined, 'MEDIUM');
+          lastSliceHmm = sliceHmm;
+          ty += sh;
+          pagesDrawn++;
         }
+        renderedY += tileH;
+      }
+
+      // Capture the footer on its own (small, fixed-size) band — it must
+      // always sit flush with the bottom edge of the FINAL PDF page, no
+      // matter how many pages the body spans. We can't rely on CSS
+      // ("position: fixed; bottom: 0") because each page is a separate
+      // raster image — instead we place the footer image explicitly,
+      // bottom-anchored, after we know what the last body page contains.
+      let footerCanvas = null;
+      if (footerHeightCss > 0) {
+        footerCanvas = await captureBand(footerTopCss, footerHeightCss);
+        if (fitRatio === null) fitRatio = maxW / footerCanvas.width;
+      }
+      const footerHeightMm = footerCanvas ? footerCanvas.height * fitRatio : 0;
+
+      // Place the footer, bottom-anchored, on the last page if it fits there
+      // alongside the body content already drawn — otherwise give it its own
+      // fresh page (still bottom-anchored, blank space above rather than below).
+      if (footerCanvas) {
+        const fitsOnLastPage = pagesDrawn > 0 && lastSliceHmm + footerHeightMm <= maxH;
+        if (pagesDrawn > 0 && !fitsOnLastPage) pdf.addPage();
+        const footerY = margin + maxH - footerHeightMm;
+        const footerData = footerCanvas.toDataURL('image/jpeg', 0.98);
+        pdf.addImage(footerData, 'JPEG', (pageW - imgW) / 2, footerY, imgW, footerHeightMm, undefined, 'MEDIUM');
       }
 
       const titleEl = sheet.querySelector('h2');
