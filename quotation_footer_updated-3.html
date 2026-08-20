@@ -1050,6 +1050,37 @@
     }
     .home-empty-icon { font-size: 40px; margin-bottom: 10px; }
 
+    /* ===================== Home summary (dashboard-style, no list) ===================== */
+    .home-summary-wrap { padding: 18px 16px 20px; }
+    .summary-stat-hero {
+      background: linear-gradient(135deg, var(--brandblue), var(--navy));
+      border-radius: 18px;
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 8px 22px rgba(11,46,109,0.22);
+      margin-bottom: 14px;
+    }
+    .summary-stat-hero-value {
+      font-family: Montserrat, sans-serif; font-weight: 800; font-size: 42px; color: #fff; line-height: 1.1;
+    }
+    .summary-stat-hero-label {
+      font-family: Montserrat, sans-serif; font-weight: 600; font-size: 12.5px; color: rgba(255,255,255,0.85);
+      margin-top: 6px; letter-spacing: 0.03em;
+    }
+    .summary-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .summary-stat-card {
+      background: #fff; border-radius: 14px; padding: 16px 14px;
+      box-shadow: 0 2px 12px rgba(11,46,109,0.08);
+      text-align: center;
+    }
+    .summary-stat-card-wide { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .summary-stat-icon { font-size: 22px; line-height: 1; }
+    .summary-stat-value { font-family: Montserrat, sans-serif; font-weight: 800; font-size: 22px; color: var(--navy); }
+    .summary-stat-label { font-family: Montserrat, sans-serif; font-weight: 600; font-size: 11px; color: #64748b; margin-top: 3px; letter-spacing: 0.02em; }
+    body.dark-theme .summary-stat-card { background: #1a2333; box-shadow: none; }
+    body.dark-theme .summary-stat-value { color: #dfe6f5; }
+    body.dark-theme .summary-stat-label { color: #8a97b3; }
+
     /* ===================== Settings screen (bottom-nav) ===================== */
     .settings-profile-card {
       display: flex; align-items: center; gap: 12px;
@@ -4750,6 +4781,73 @@ function BottomNav({ activeTab, onNavigate }) {
   );
 }
 
+function HomeSummaryScreen() {
+  const [index, setIndex] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const list = await loadQuotationIndex();
+      setIndex(list);
+    })();
+  }, []);
+
+  const list = index || [];
+  const totalCount = list.length;
+  const quotationCount = list.filter((q) => q.docType !== 'bill').length;
+  const billCount = list.filter((q) => q.docType === 'bill').length;
+  const totalValue = list.reduce((sum, q) => {
+    const n = Number(String(q.total || '').replace(/,/g, ''));
+    return sum + (isFinite(n) ? n : 0);
+  }, 0);
+
+  return (
+    <div className="home-screen">
+      <div className="home-header">
+        <div>
+          <div className="home-title">QUOTATION APP</div>
+          <div className="home-subtitle">Overview</div>
+        </div>
+      </div>
+
+      {index === null ? (
+        <div className="home-empty">Loading…</div>
+      ) : totalCount === 0 ? (
+        <div className="home-empty">
+          <div className="home-empty-icon">📄</div>
+          <p style={{ fontWeight: 700, color: '#1d2939', fontSize: 14, margin: '0 0 4px' }}>No Quotations Yet</p>
+          <p style={{ margin: 0 }}>Go to the Waterproofing tab to create your first quotation.</p>
+        </div>
+      ) : (
+        <div className="home-summary-wrap">
+          <div className="summary-stat-hero">
+            <div className="summary-stat-hero-value">{totalCount}</div>
+            <div className="summary-stat-hero-label">TOTAL QUOTATIONS &amp; BILLS</div>
+          </div>
+          <div className="summary-stat-grid">
+            <div className="summary-stat-card">
+              <div className="summary-stat-icon">📄</div>
+              <div className="summary-stat-value">{quotationCount}</div>
+              <div className="summary-stat-label">QUOTATIONS</div>
+            </div>
+            <div className="summary-stat-card">
+              <div className="summary-stat-icon">🧾</div>
+              <div className="summary-stat-value">{billCount}</div>
+              <div className="summary-stat-label">BILLS</div>
+            </div>
+            <div className="summary-stat-card summary-stat-card-wide">
+              <div className="summary-stat-icon">💰</div>
+              <div>
+                <div className="summary-stat-value">₹{formatINR(totalValue)}</div>
+                <div className="summary-stat-label">TOTAL VALUE</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function QuotationListScreen({ variant, onOpen, onCreate, onShare }) {
   const isWP = variant === 'waterproofing';
   const [index, setIndex] = useState(null);
@@ -4940,7 +5038,7 @@ function Root() {
 
   return (
     <>
-      {activeTab === 'home' && <QuotationListScreen variant="home" onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />}
+      {activeTab === 'home' && <HomeSummaryScreen />}
       {activeTab === 'waterproofing' && <QuotationListScreen variant="waterproofing" onOpen={openQuotation} onCreate={createQuotation} onShare={shareQuotation} />}
       {activeTab === 'settings' && <SettingsScreen />}
       <BottomNav activeTab={activeTab} onNavigate={setActiveTab} />
