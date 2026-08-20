@@ -44,6 +44,12 @@
       background: #ffffff;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+      /* The quotation document's own branding must stay fixed no matter
+         which app-wide colour theme is selected in Settings — only the
+         app chrome (bars, buttons, nav) should follow the theme. */
+      --navy: #0B2E6D;
+      --navy-dark: #082250;
+      --brandblue: #1A56C4;
     }
     .sheet-wrap {
       display: flex;
@@ -422,7 +428,7 @@
       top: var(--appbar-h);
       left: 0; right: 0;
       height: var(--toolbar-h);
-      background: #0e3a86;
+      background: var(--navy-dark);
       display: flex;
       align-items: center;
       gap: 2px;
@@ -802,6 +808,29 @@
     .switch input:checked + .slider { background: var(--brandblue); }
     .switch input:checked + .slider:before { transform: translateX(18px); }
 
+    /* ===== App Colour theme swatches ===== */
+    .theme-swatch-row { display: flex; gap: 12px; padding: 4px 0 2px; flex-wrap: wrap; }
+    .theme-swatch-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+    .theme-swatch {
+      -webkit-tap-highlight-color: transparent;
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 2px solid transparent; padding: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 120ms ease, border-color 120ms ease;
+      position: relative; flex-shrink: 0;
+    }
+    .theme-swatch:active { transform: scale(0.92); }
+    .theme-swatch.selected { border-color: #1d2939; }
+    body.dark-theme .theme-swatch.selected { border-color: #dfe6f5; }
+    .theme-swatch-check {
+      width: 16px; height: 16px; color: #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.4));
+    }
+    .theme-swatch-label {
+      font-family: Montserrat, sans-serif; font-size: 9px; font-weight: 600; color: #64748b;
+      text-align: center; max-width: 56px; line-height: 1.2;
+    }
+    body.dark-theme .theme-swatch-label { color: #8a97b3; }
+
     /* ===== Splash screen ===== */
     #splash {
       position: fixed; inset: 0; z-index: 99999;
@@ -1081,13 +1110,13 @@
     body.dark-theme .home-empty { color: #6b7d9e; }
 
     /* ===================== Layout Edit Mode ===================== */
-    .layout-editing { outline: 2px dashed #1A56C4; cursor: grab; }
+    .layout-editing { outline: 2px dashed var(--brandblue); cursor: grab; }
     .layout-editing:active { cursor: grabbing; }
     .layout-drag-label {
       position: absolute;
       top: -20px;
       left: 0;
-      background: #1A56C4;
+      background: var(--brandblue);
       color: #fff;
       font-family: Montserrat, sans-serif;
       font-size: 9.5px;
@@ -1205,6 +1234,20 @@
     const STORAGE_LOGO = 'quotation_logo_v1';
     const DOC_KEY = 'quotation_document_v2';
     const PREFS_KEY = 'quotation_prefs_v1';
+
+    const APP_THEMES = [
+      { id: 'navy', name: 'Classic Navy', navy: '#0B2E6D', navyDark: '#082250', brandblue: '#1A56C4' },
+      { id: 'emerald', name: 'Emerald Green', navy: '#0F5132', navyDark: '#073820', brandblue: '#18A65A' },
+      { id: 'charcoal', name: 'Charcoal Gold', navy: '#22282F', navyDark: '#14181D', brandblue: '#C89B3C' },
+      { id: 'purple', name: 'Royal Purple', navy: '#4C1D95', navyDark: '#2E1065', brandblue: '#8B5CF6' },
+      { id: 'burgundy', name: 'Burgundy Red', navy: '#7F1D2B', navyDark: '#4C0F17', brandblue: '#D94B5C' }
+    ];
+    function applyAppTheme(themeId) {
+      const t = APP_THEMES.find((x) => x.id === themeId) || APP_THEMES[0];
+      document.body.style.setProperty('--navy', t.navy);
+      document.body.style.setProperty('--navy-dark', t.navyDark);
+      document.body.style.setProperty('--brandblue', t.brandblue);
+    }
 
     function loadJSON(key, fallback) {
       try {
@@ -3210,6 +3253,25 @@ function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance
                 <span className="slider" />
               </label>
             </div>
+            <div style={{ padding: '8px 0 2px' }}>
+              <span style={{ display: 'block', marginBottom: 6 }}>App Colour</span>
+              <div className="theme-swatch-row">
+                {APP_THEMES.map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    className={`theme-swatch${appearance.theme === t.id || (!appearance.theme && t.id === 'navy') ? ' selected' : ''}`}
+                    style={{ background: `linear-gradient(135deg, ${t.brandblue}, ${t.navy})` }}
+                    onClick={() => setAppearance((a) => ({ ...a, theme: t.id }))}
+                    title={t.name}
+                  >
+                    {(appearance.theme === t.id || (!appearance.theme && t.id === 'navy')) && (
+                      <IconSvg d="M20 6 9 17l-5-5" className="theme-swatch-check" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="settings-group">
@@ -3330,7 +3392,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
   const [images, setImagesRaw] = useState({ ...defaultImages });
   const [tableSettings, setTableSettingsRaw] = useState({ ...DEFAULT_TABLE_SETTINGS });
   const [defaults, setDefaultsRaw] = useState({ ...defaultTextDefaults });
-  const [appearance, setAppearance] = useState({ dark: false });
+  const [appearance, setAppearance] = useState({ dark: false, theme: 'navy' });
 
   const [loaded, setLoaded] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle');
@@ -3639,6 +3701,10 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
   useEffect(() => {
     document.body.classList.toggle('dark-theme', !!appearance.dark);
   }, [appearance.dark]);
+
+  useEffect(() => {
+    applyAppTheme(appearance.theme);
+  }, [appearance.theme]);
 
   const flushSaveNow = () => {
     if (saveTimerRef.current) { clearTimeout(saveTimerRef.current); saveTimerRef.current = null; }
@@ -4399,7 +4465,7 @@ function DataPanel({ open, onClose }) {
 
 function SettingsScreen() {
   const [defaults, setDefaultsRaw] = useState({ font: '"Montserrat", Arial, sans-serif', size: 12, color: '#0B2E6D', align: 'left', pdfFormat: 'number_client' });
-  const [appearance, setAppearance] = useState({ dark: false });
+  const [appearance, setAppearance] = useState({ dark: false, theme: 'navy' });
   const [defaultTableSettings, setDefaultTableSettingsRaw] = useState({ ...DEFAULT_TABLE_SETTINGS });
   const [company, setCompany] = useState({ ...DEFAULT_COMPANY });
   const [defaultAssets, setDefaultAssets] = useState({ logo: null, signature: null });
@@ -4434,6 +4500,10 @@ function SettingsScreen() {
   useEffect(() => {
     document.body.classList.toggle('dark-theme', !!appearance.dark);
   }, [appearance.dark]);
+
+  useEffect(() => {
+    applyAppTheme(appearance.theme);
+  }, [appearance.theme]);
 
   const saveCompany = (next) => {
     setCompany(next);
@@ -4522,6 +4592,31 @@ function SettingsScreen() {
                 </ImageZone>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>APP COLOUR</h4>
+          <p style={{ margin: '0 0 10px', fontFamily: 'Montserrat, sans-serif', fontSize: 11.5, color: '#8794ab', lineHeight: 1.5 }}>
+            Pick a theme for the app — the printed quotation always stays in its fixed professional branding.
+          </p>
+          <div className="theme-swatch-row">
+            {APP_THEMES.map((t) => (
+              <div className="theme-swatch-item" key={t.id}>
+                <button
+                  type="button"
+                  className={`theme-swatch${appearance.theme === t.id || (!appearance.theme && t.id === 'navy') ? ' selected' : ''}`}
+                  style={{ background: `linear-gradient(135deg, ${t.brandblue}, ${t.navy})` }}
+                  onClick={() => setAppearance((a) => ({ ...a, theme: t.id }))}
+                  title={t.name}
+                >
+                  {(appearance.theme === t.id || (!appearance.theme && t.id === 'navy')) && (
+                    <IconSvg d="M20 6 9 17l-5-5" className="theme-swatch-check" />
+                  )}
+                </button>
+                <span className="theme-swatch-label">{t.name}</span>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -4807,6 +4902,16 @@ function Root() {
   useEffect(() => {
     (async () => {
       await migrateLegacyDraftIfNeeded();
+      // Apply the saved app-wide appearance (colour theme + dark mode)
+      // immediately on cold start, regardless of which tab is first shown —
+      // Home/Waterproofing/Settings/Editor each also re-apply it reactively
+      // once mounted, but without this the very first paint (before any of
+      // those screens mount) would flash the default theme.
+      const prefs = (await idbGet(PREFS_KEY)) || loadJSON(PREFS_KEY, null);
+      if (prefs && prefs.appearance) {
+        applyAppTheme(prefs.appearance.theme);
+        document.body.classList.toggle('dark-theme', !!prefs.appearance.dark);
+      }
       setReady(true);
       if (window.__hideSplashWhenReady) window.__hideSplashWhenReady();
     })();
