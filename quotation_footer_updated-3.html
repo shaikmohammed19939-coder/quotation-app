@@ -690,6 +690,18 @@
       .modal-sheet { border-radius: 16px; max-height: 80vh; }
     }
     @keyframes sheet-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-btn {
+      flex: 1; height: 44px; border: none; border-radius: 10px;
+      font-family: Montserrat, sans-serif; font-weight: 700; font-size: 13.5px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      transition: transform 100ms ease, background-color 150ms ease;
+    }
+    .modal-btn:active { transform: scale(0.97); }
+    .modal-btn-primary { background: var(--navy); color: #fff; }
+    .modal-btn-danger { background: #D32F2F; color: #fff; }
+    .modal-btn-ghost { background: #eef1f7; color: #475569; }
+    body.dark-theme .modal-btn-ghost { background: #232f45; color: #dfe6f5; }
 
     /* ===== Professional color picker modal (Material / Color / Clear) ===== */
     .cp-overlay { align-items: center; padding: 16px; box-sizing: border-box; }
@@ -4289,11 +4301,11 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
                 autoFocus
                 style={{ width: '100%', marginTop: 6, padding: '10px 12px', border: '1px solid #d3dbe8', borderRadius: 8, fontSize: 14, fontFamily: 'Montserrat, sans-serif', color: '#0B2E6D', boxSizing: 'border-box' }}
               />
-              <div style={{ display: 'flex', gap: 14, marginTop: 16 }}>
-                <button type="button" className="upload-btn" onClick={confirmPdfPrompt} style={{ fontWeight: 700 }}>
+              <div className="modal-actions">
+                <button type="button" className="modal-btn modal-btn-ghost ripple-surface" onClick={() => setPdfPromptOpen(false)}>Cancel</button>
+                <button type="button" className="modal-btn modal-btn-primary ripple-surface" onClick={confirmPdfPrompt}>
                   {pdfPromptMode === 'share' ? 'Share' : 'Download PDF'}
                 </button>
-                <button type="button" className="upload-btn" onClick={() => setPdfPromptOpen(false)}>Cancel</button>
               </div>
             </div>
           </div>
@@ -4309,9 +4321,9 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             </div>
             <div className="modal-body">
               <p style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 13, color: '#333', margin: 0 }}>{pdfError}</p>
-              <div style={{ display: 'flex', gap: 14, marginTop: 16 }}>
-                <button type="button" className="upload-btn" onClick={() => { setPdfError(''); handleDownloadPdf(); }}>Retry</button>
-                <button type="button" className="upload-btn" onClick={() => setPdfError('')}>Dismiss</button>
+              <div className="modal-actions">
+                <button type="button" className="modal-btn modal-btn-ghost ripple-surface" onClick={() => setPdfError('')}>Dismiss</button>
+                <button type="button" className="modal-btn modal-btn-primary ripple-surface" onClick={() => { setPdfError(''); handleDownloadPdf(); }}>Retry</button>
               </div>
             </div>
           </div>
@@ -5059,9 +5071,9 @@ function QuotationListScreen({ variant, onOpen, onCreate, onShare }) {
               <p style={{ fontSize: 13, color: '#333', fontFamily: 'Montserrat, sans-serif', margin: '0 0 16px' }}>
                 This can't be undone.
               </p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                <button type="button" className="upload-btn" style={{ color: '#D32F2F', fontWeight: 700 }} onClick={handleDeleteConfirmed}>Delete</button>
-                <button type="button" className="upload-btn" onClick={() => setDeleteTarget(null)}>Cancel</button>
+              <div className="modal-actions">
+                <button type="button" className="modal-btn modal-btn-ghost ripple-surface" onClick={() => setDeleteTarget(null)}>Cancel</button>
+                <button type="button" className="modal-btn modal-btn-danger ripple-surface" onClick={handleDeleteConfirmed}>Delete</button>
               </div>
             </div>
           </div>
