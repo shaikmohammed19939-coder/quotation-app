@@ -126,55 +126,6 @@
       padding-right: 4px;
     }
 
-    /* Per-cell vertical text alignment for Unit/Qty/Rate/Amount cells.
-       height:100% lets the wrapper fill the full (row-height-tall) table
-       cell so top/center/bottom actually differ when a neighboring cell
-       (e.g. a multi-line description) makes the row taller. */
-    .cell-align-wrap {
-      position: relative;
-      min-height: 36px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-    .cell-align-wrap.cell-align-top { justify-content: flex-start; }
-    .cell-align-wrap.cell-align-center { justify-content: center; }
-    .cell-align-wrap.cell-align-bottom { justify-content: flex-end; }
-    .cell-align-toolbar {
-      display: none;
-      gap: 4px;
-      margin-top: 4px;
-      padding: 2px;
-      justify-content: center;
-      background: #eef2fa;
-      border-radius: 6px;
-    }
-    .cell-align-wrap:focus-within .cell-align-toolbar {
-      display: flex;
-    }
-    .cell-align-toolbar button {
-      width: 24px;
-      height: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 4px;
-      border: none;
-      background: transparent;
-      color: #5b6b85;
-      font-family: Montserrat, sans-serif;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .cell-align-toolbar button.active {
-      background: #0B2E6D;
-      color: #ffffff;
-    }
-    body.pdf-exporting .cell-align-toolbar {
-      display: none !important;
-    }
-
     .img-box {
       position: relative;
       overflow: hidden;
@@ -186,36 +137,48 @@
       -webkit-user-drag: none;
       max-width: none;
       max-height: none;
+      touch-action: none;
     }
     .placed-img.selected {
       outline: 1px dashed #1A56C4;
     }
     .resize-handle {
       position: absolute;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      touch-action: none;
+    }
+    .resize-handle::after {
+      content: "";
       width: 10px;
       height: 10px;
       background: #1A56C4;
       border: 1px solid #fff;
-      z-index: 5;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
     .resize-handle.br {
-      right: -5px;
-      bottom: -5px;
+      right: -11px;
+      bottom: -11px;
       cursor: se-resize;
     }
     .resize-handle.bl {
-      left: -5px;
-      bottom: -5px;
+      left: -11px;
+      bottom: -11px;
       cursor: sw-resize;
     }
     .resize-handle.tr {
-      right: -5px;
-      top: -5px;
+      right: -11px;
+      top: -11px;
       cursor: ne-resize;
     }
     .resize-handle.tl {
-      left: -5px;
-      top: -5px;
+      left: -11px;
+      top: -11px;
       cursor: nw-resize;
     }
 
@@ -1196,6 +1159,7 @@
       address: ['Plot No. 33, Shivaji Nagar', 'Nagar Govindi Shivaji Nagar,', 'Mumbai, Maharashtra']
     };
     const COMPANY_PROFILE_KEY = 'company_profile_v1';
+    const DEFAULT_ASSETS_KEY = 'default_logo_signature_v1';
 
     const customerFields = [
       { label: 'Client Name', lines: 1, key: 'clientName' },
@@ -1414,6 +1378,9 @@
       if (prefs && prefs.defaultTableSettings) {
         doc.tableSettings = { ...DEFAULT_TABLE_SETTINGS, ...prefs.defaultTableSettings };
       }
+      const defaultAssets = await idbGet(DEFAULT_ASSETS_KEY);
+      if (defaultAssets && defaultAssets.logo) doc.images.logo = defaultAssets.logo;
+      if (defaultAssets && defaultAssets.signature) doc.images.signature = defaultAssets.signature;
       await idbSet(quotationDocKey(id), doc);
       await upsertIndexEntry(id, doc);
       return id;
@@ -1540,6 +1507,20 @@
       const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec((hex || '').trim());
       if (!m) return null;
       return { r: parseInt(m[1], 16), g: parseInt(m[2], 16), b: parseInt(m[3], 16) };
+    }
+
+    // On phones the whole document shrinks via CSS `zoom` on .sheet-scale
+    // (not `transform`, so it reflows layout — see the comment at that rule)
+    // so 1 real screen/touch pixel of pointer movement is worth more than 1
+    // logical CSS pixel inside that subtree. Any custom drag math computed
+    // from raw event.clientX/Y deltas — image move/resize, layout-edit drag —
+    // must divide by this factor, or the object visibly lags far behind the
+    // finger on mobile while tracking correctly on desktop (zoom is 1 there).
+    function getSheetZoomFactor() {
+      const el = document.querySelector('.sheet-scale');
+      if (!el) return 1;
+      const z = parseFloat(getComputedStyle(el).zoom);
+      return isFinite(z) && z > 0 ? z : 1;
     }
 
     function formatINR(num) {
@@ -2142,12 +2123,14 @@
       useEffect(() => { drawOverlay(); }, [drawOverlay]);
 
       const onPointerDown = (e) => {
+        e.preventDefault();
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         dragRef.current = { startX: x, startY: y, mode: 'new' };
         setSel({ x, y, w: 0, h: 0 });
+        try { canvas.setPointerCapture(e.pointerId); } catch {}
       };
       const onPointerMove = (e) => {
         if (!dragRef.current) return;
@@ -2162,7 +2145,10 @@
         const nh = Math.abs(y - startY);
         setSel({ x: nx, y: ny, w: nw, h: nh });
       };
-      const onPointerUp = () => { dragRef.current = null; };
+      const onPointerUp = (e) => {
+        dragRef.current = null;
+        try { canvasRef.current.releasePointerCapture(e.pointerId); } catch {}
+      };
 
       const applyCrop = () => {
         const canvas = canvasRef.current;
@@ -2193,7 +2179,7 @@
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onPointerLeave={onPointerUp}
-              style={{ display: 'block', maxWidth: '100%' }}
+              style={{ display: 'block', maxWidth: '100%', touchAction: 'none' }}
               />
             </div>
             <div className="crop-actions">
@@ -2222,77 +2208,79 @@
         return { ...pos, x, y, w, h };
       };
 
-      const onMoveStart = (e) => {
+      // touch-action:none (set via CSS on .placed-img/.resize-handle) plus
+      // explicit pointer capture is what makes this reliable on touch: without
+      // both, the browser can interpret a finger-drag on the image as a page
+      // scroll/pan and hijack the gesture before pointermove ever fires, or
+      // the pointer can "slide off" the element mid-drag and stop delivering
+      // move events. Capturing on the exact element the gesture started on
+      // keeps every subsequent move/up event routed there regardless of
+      // where the finger travels.
+      const onMoveDown = (e) => {
         e.preventDefault();
         e.stopPropagation();
         setSelected(true);
-        dragState.current = {
-          mode: 'move',
-          startX: e.clientX,
-          startY: e.clientY,
-          origX: data.x,
-          origY: data.y
-        };
+        dragState.current = { mode: 'move', startX: e.clientX, startY: e.clientY, origX: data.x, origY: data.y, zoom: getSheetZoomFactor() };
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
+      };
+      const onMoveMove = (e) => {
+        const st = dragState.current;
+        if (!st || st.mode !== 'move') return;
+        const dx = (e.clientX - st.startX) / st.zoom;
+        const dy = (e.clientY - st.startY) / st.zoom;
+        onChange(clamp({ ...data, x: st.origX + dx, y: st.origY + dy }));
+      };
+      const onMoveUp = (e) => {
+        dragState.current = null;
+        try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
       };
 
-      const onResizeStart = (e, corner) => {
+      // Resize tracks the pointer's actual position relative to the box (not
+      // just horizontal delta from the start point) so dragging a corner in
+      // any direction — including mostly-vertical — smoothly scales the
+      // image. The opposite corner stays anchored and width/height are
+      // always recomputed from the same ratio, so the aspect ratio can never
+      // drift out of sync regardless of drag direction.
+      const onResizeDown = (e, corner) => {
         e.preventDefault();
         e.stopPropagation();
         setSelected(true);
-        dragState.current = {
-          mode: 'resize',
-          corner,
-          startX: e.clientX,
-          startY: e.clientY,
-          orig: { ...data }
-        };
+        dragState.current = { mode: 'resize', corner, orig: { ...data }, zoom: getSheetZoomFactor() };
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch {}
       };
+      const onResizeMove = (e) => {
+        const st = dragState.current;
+        if (!st || st.mode !== 'resize') return;
+        const box = boxRef.current;
+        if (!box) return;
+        const rect = box.getBoundingClientRect();
+        const px = (e.clientX - rect.left) / st.zoom;
+        const py = (e.clientY - rect.top) / st.zoom;
+        const o = st.orig;
+        const ratio = o.w / o.h;
+        let anchorX, anchorY;
+        if (st.corner === 'br') { anchorX = o.x; anchorY = o.y; }
+        else if (st.corner === 'bl') { anchorX = o.x + o.w; anchorY = o.y; }
+        else if (st.corner === 'tr') { anchorX = o.x; anchorY = o.y + o.h; }
+        else { anchorX = o.x + o.w; anchorY = o.y + o.h; }
 
-      useEffect(() => {
-        const onMove = (e) => {
-          if (!dragState.current) return;
-          const st = dragState.current;
-          if (st.mode === 'move') {
-            const dx = e.clientX - st.startX;
-            const dy = e.clientY - st.startY;
-            onChange(clamp({ ...data, x: st.origX + dx, y: st.origY + dy }));
-          } else if (st.mode === 'resize') {
-            const dx = e.clientX - st.startX;
-            const dy = e.clientY - st.startY;
-            const o = st.orig;
-            const ratio = o.w / o.h;
-            let nw = o.w,
-              nh = o.h,
-              nx = o.x,
-              ny = o.y;
-            if (st.corner === 'br') {
-              nw = o.w + dx;
-              nh = nw / ratio;
-            } else if (st.corner === 'bl') {
-              nw = o.w - dx;
-              nh = nw / ratio;
-              nx = o.x + (o.w - nw);
-            } else if (st.corner === 'tr') {
-              nw = o.w + dx;
-              nh = nw / ratio;
-              ny = o.y + (o.h - nh);
-            } else if (st.corner === 'tl') {
-              nw = o.w - dx;
-              nh = nw / ratio;
-              nx = o.x + (o.w - nw);
-              ny = o.y + (o.h - nh);
-            }
-            onChange(clamp({ ...data, x: nx, y: ny, w: nw, h: nh }));
-          }
-        };
-        const onUp = () => { dragState.current = null; };
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-        return () => {
-          window.removeEventListener('pointermove', onMove);
-          window.removeEventListener('pointerup', onUp);
-        };
-      });
+        const dxAnchor = Math.abs(px - anchorX);
+        const dyAnchor = Math.abs(py - anchorY);
+        const nw = Math.max(24, (dxAnchor + dyAnchor * ratio) / 2);
+        const nh = nw / ratio;
+
+        let nx, ny;
+        if (st.corner === 'br') { nx = o.x; ny = o.y; }
+        else if (st.corner === 'bl') { nx = anchorX - nw; ny = o.y; }
+        else if (st.corner === 'tr') { nx = o.x; ny = anchorY - nh; }
+        else { nx = anchorX - nw; ny = anchorY - nh; }
+
+        onChange(clamp({ ...data, x: nx, y: ny, w: nw, h: nh }));
+      };
+      const onResizeUp = (e) => {
+        dragState.current = null;
+        try { e.currentTarget.releasePointerCapture(e.pointerId); } catch {}
+      };
 
       useEffect(() => {
         const onDocClick = (e) => {
@@ -2306,7 +2294,10 @@
         <div
         className={`placed-img ${selected ? 'selected' : ''}`}
         style={{ left: data.x, top: data.y, width: data.w, height: data.h }}
-        onPointerDown={onMoveStart}
+        onPointerDown={onMoveDown}
+        onPointerMove={onMoveMove}
+        onPointerUp={onMoveUp}
+        onPointerCancel={onMoveUp}
         >
         <img
         src={data.src}
@@ -2316,10 +2307,10 @@
         />
         {selected && (
           <>
-          <div className="resize-handle tl" onPointerDown={(e) => onResizeStart(e, 'tl')} />
-          <div className="resize-handle tr" onPointerDown={(e) => onResizeStart(e, 'tr')} />
-          <div className="resize-handle bl" onPointerDown={(e) => onResizeStart(e, 'bl')} />
-          <div className="resize-handle br" onPointerDown={(e) => onResizeStart(e, 'br')} />
+          <div className="resize-handle tl" onPointerDown={(e) => onResizeDown(e, 'tl')} onPointerMove={onResizeMove} onPointerUp={onResizeUp} onPointerCancel={onResizeUp} />
+          <div className="resize-handle tr" onPointerDown={(e) => onResizeDown(e, 'tr')} onPointerMove={onResizeMove} onPointerUp={onResizeUp} onPointerCancel={onResizeUp} />
+          <div className="resize-handle bl" onPointerDown={(e) => onResizeDown(e, 'bl')} onPointerMove={onResizeMove} onPointerUp={onResizeUp} onPointerCancel={onResizeUp} />
+          <div className="resize-handle br" onPointerDown={(e) => onResizeDown(e, 'br')} onPointerMove={onResizeMove} onPointerUp={onResizeUp} onPointerCancel={onResizeUp} />
           </>
         )}
       </div>
@@ -2863,20 +2854,6 @@ function rowHasContent(item) {
     (item.rate || '').toString().trim() || (item.amount || '').toString().trim());
 }
 
-function AlignableCell({ value, align, onChange, onAlignChange, className = '' }) {
-  const resolvedAlign = align || 'bottom';
-  return (
-    <div className={`cell-align-wrap cell-align-${resolvedAlign}`}>
-      <EditLine multiline value={value} onChange={onChange} className={className} />
-      <div className="cell-align-toolbar no-print">
-        <button type="button" className={resolvedAlign === 'top' ? 'active' : ''} title="Align top" onClick={() => onAlignChange('top')}>T</button>
-        <button type="button" className={resolvedAlign === 'center' ? 'active' : ''} title="Align center" onClick={() => onAlignChange('center')}>C</button>
-        <button type="button" className={resolvedAlign === 'bottom' ? 'active' : ''} title="Align bottom" onClick={() => onAlignChange('bottom')}>B</button>
-      </div>
-    </div>
-  );
-}
-
 const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canDelete, ts, borderCls, cellPad, defaults, onUpdateItem, onDuplicateRow, onMoveRow, onRemoveRow }) {
   const handleDeleteClick = () => {
     if (rowHasContent(item)) {
@@ -2925,42 +2902,28 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
       )}
       {ts.showUnit && (
         <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px] leading-[16px]`}>
-          <AlignableCell
-            value={item.unit}
-            align={item.unitAlign || 'top'}
-            onChange={(v) => onUpdateItem(item.id, 'unit', v)}
-            onAlignChange={(a) => onUpdateItem(item.id, 'unitAlign', a)}
-          />
+          <EditLine value={item.unit} onChange={(v) => onUpdateItem(item.id, 'unit', v)} />
         </td>
       )}
       {ts.showQty && (
-        <td className={`${borderCls} px-[8px] ${cellPad}`}>
-          <AlignableCell
-            value={item.qty}
-            align={item.qtyAlign}
-            onChange={(v) => onUpdateItem(item.id, 'qty', v)}
-            onAlignChange={(a) => onUpdateItem(item.id, 'qtyAlign', a)}
-          />
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.qty} onChange={(v) => onUpdateItem(item.id, 'qty', v)} />
+          </div>
         </td>
       )}
       {ts.showRate && (
-        <td className={`${borderCls} px-[8px] ${cellPad}`}>
-          <AlignableCell
-            value={item.rate}
-            align={item.rateAlign}
-            onChange={(v) => onUpdateItem(item.id, 'rate', v)}
-            onAlignChange={(a) => onUpdateItem(item.id, 'rateAlign', a)}
-          />
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.rate} onChange={(v) => onUpdateItem(item.id, 'rate', v)} />
+          </div>
         </td>
       )}
       {ts.showAmount && (
-        <td className={`${borderCls} px-[8px] ${cellPad}`}>
-          <AlignableCell
-            value={item.amount}
-            align={item.amountAlign}
-            onChange={(v) => onUpdateItem(item.id, 'amount', v)}
-            onAlignChange={(a) => onUpdateItem(item.id, 'amountAlign', a)}
-          />
+        <td className={`${borderCls} px-[8px] ${cellPad} align-bottom`}>
+          <div style={{ minHeight: '36px', display: 'flex', alignItems: 'flex-end' }}>
+            <EditLine value={item.amount} onChange={(v) => onUpdateItem(item.id, 'amount', v)} />
+          </div>
         </td>
       )}
     </tr>
@@ -3177,13 +3140,13 @@ function LayoutSection({ id, editEnabled, layout, onMove, onMoveEnd, label, chil
     if (!editEnabled) return;
     e.preventDefault();
     e.stopPropagation();
-    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x || 0, origY: pos.y || 0 };
+    dragRef.current = { startX: e.clientX, startY: e.clientY, origX: pos.x || 0, origY: pos.y || 0, zoom: getSheetZoomFactor() };
     try { elRef.current.setPointerCapture(e.pointerId); } catch {}
   };
   const onPointerMove = (e) => {
     if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
+    const dx = (e.clientX - dragRef.current.startX) / dragRef.current.zoom;
+    const dy = (e.clientY - dragRef.current.startY) / dragRef.current.zoom;
     onMove(id, { x: dragRef.current.origX + dx, y: dragRef.current.origY + dy });
   };
   const onPointerUp = () => {
@@ -4439,6 +4402,7 @@ function SettingsScreen() {
   const [appearance, setAppearance] = useState({ dark: false });
   const [defaultTableSettings, setDefaultTableSettingsRaw] = useState({ ...DEFAULT_TABLE_SETTINGS });
   const [company, setCompany] = useState({ ...DEFAULT_COMPANY });
+  const [defaultAssets, setDefaultAssets] = useState({ logo: null, signature: null });
   const [loaded, setLoaded] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [appInfoOpen, setAppInfoOpen] = useState(false);
@@ -4454,6 +4418,8 @@ function SettingsScreen() {
       }
       const savedCompany = await idbGet(COMPANY_PROFILE_KEY);
       if (savedCompany) setCompany((c) => ({ ...c, ...savedCompany }));
+      const savedAssets = await idbGet(DEFAULT_ASSETS_KEY);
+      if (savedAssets) setDefaultAssets((a) => ({ ...a, ...savedAssets }));
       setLoaded(true);
     })();
   }, []);
@@ -4472,6 +4438,21 @@ function SettingsScreen() {
   const saveCompany = (next) => {
     setCompany(next);
     idbSet(COMPANY_PROFILE_KEY, next);
+  };
+
+  const setDefaultLogo = (val) => {
+    setDefaultAssets((a) => {
+      const next = { ...a, logo: val };
+      idbSet(DEFAULT_ASSETS_KEY, next);
+      return next;
+    });
+  };
+  const setDefaultSignature = (val) => {
+    setDefaultAssets((a) => {
+      const next = { ...a, signature: val };
+      idbSet(DEFAULT_ASSETS_KEY, next);
+      return next;
+    });
   };
 
   const tableOptions = [
@@ -4511,6 +4492,36 @@ function SettingsScreen() {
           <div className="settings-row" onClick={() => setProfileOpen(true)} style={{ cursor: 'pointer' }}>
             <span>Edit Company Profile</span>
             <IconSvg d="m9 18 6-6-6-6" className="h-[14px] w-[14px] text-slate-400" />
+          </div>
+        </div>
+
+        <div className="settings-card">
+          <h4>DEFAULT LOGO &amp; SIGNATURE</h4>
+          <p style={{ margin: '0 0 12px', fontFamily: 'Montserrat, sans-serif', fontSize: 11.5, color: '#8794ab', lineHeight: 1.5 }}>
+            Set these once — every new quotation starts with them already in place.
+          </p>
+          <div style={{ display: 'flex', gap: 14 }}>
+            <div style={{ flex: '0 0 120px' }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>Logo</div>
+              {/* Same box size as the editor's own logo zone (120x120) — the
+                  stored placement is absolute pixels relative to this box, so
+                  it must match exactly for a default set here to land
+                  correctly positioned when it seeds a brand-new quotation. */}
+              <div style={{ width: 120, height: 120 }}>
+                <ImageZone value={defaultAssets.logo} onChange={setDefaultLogo} defaultW={120} defaultH={120} label="Logo">
+                  <div className="w-full h-full border-2 border-dashed border-navy/40 rounded-md bg-gray-50" />
+                </ImageZone>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0, maxWidth: 180 }}>
+              <div style={{ fontFamily: 'Montserrat, sans-serif', fontSize: 11, fontWeight: 700, color: 'var(--navy)', marginBottom: 6 }}>Signature</div>
+              {/* Matches the editor's signature zone (180x52) for the same reason. */}
+              <div style={{ width: 180, height: 52 }}>
+                <ImageZone value={defaultAssets.signature} onChange={setDefaultSignature} defaultW={180} defaultH={52} label="Signature">
+                  <div className="w-full h-full border-2 border-dashed border-navy/40 rounded-md bg-gray-50" />
+                </ImageZone>
+              </div>
+            </div>
           </div>
         </div>
 
