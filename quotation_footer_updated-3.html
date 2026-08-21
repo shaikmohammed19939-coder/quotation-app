@@ -1412,6 +1412,20 @@ const FACTORY_DEFAULT_SIGNATURE = {
       return new File([JSON.stringify(payload)], filename, { type: 'application/json' });
     }
 
+    // Triggers a plain browser download of an already-built backup File.
+    // Synchronous (no I/O) so it's safe to call as a same-gesture fallback
+    // from inside a share attempt without losing user-activation.
+    function downloadBackupFile(file) {
+      const url = URL.createObjectURL(file);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    }
+
     // Downloads a JSON backup of every saved quotation. This file lands in
     // the device's normal Downloads folder, which is OUTSIDE this app's own
     // storage — so unlike the app's on-device data (IndexedDB), it survives
@@ -1421,36 +1435,8 @@ const FACTORY_DEFAULT_SIGNATURE = {
     async function runQuotationBackup() {
       const file = await buildBackupFile();
       if (!file) return false;
-      const url = URL.createObjectURL(file);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      downloadBackupFile(file);
       return true;
-    }
-
-    // Hands the same backup file to the device's native share sheet, so it
-    // can go straight to Google Drive, Gmail, WhatsApp, etc. in one tap —
-    // no account or server of ours involved, and it lands wherever the user
-    // already keeps things safe. Falls back to a plain download when the
-    // Web Share API (or file sharing specifically) isn't available.
-    async function shareQuotationBackup() {
-      const file = await buildBackupFile();
-      if (!file) return { ok: false, reason: 'empty' };
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file], title: 'Quotation App Backup' });
-          return { ok: true };
-        } catch (e) {
-          if (e && e.name === 'AbortError') return { ok: false, reason: 'cancelled' };
-          return { ok: false, reason: 'error' };
-        }
-      }
-      const did = await runQuotationBackup();
-      return did ? { ok: true, reason: 'downloaded' } : { ok: false, reason: 'empty' };
     }
 
     const APP_THEMES = [
@@ -4618,34 +4604,65 @@ function AppInfoModal({ open, onClose }) {
 
 function DataPanel({ open, onClose }) {
   const [status, setStatus] = useState('');
+  // Pre-built the moment the panel opens (not on click) so that tapping
+  // "Share Backup" can call navigator.share() immediately, with no
+  // IndexedDB/async work in between — Chrome requires share() to run
+  // within the user gesture's activation window, and any I/O beforehand
+  // risks that window expiring and share() silently failing.
+  const backupFileRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) { backupFileRef.current = null; return; }
+    let cancelled = false;
+    (async () => {
+      const file = await buildBackupFile();
+      if (!cancelled) backupFileRef.current = file;
+    })();
+    return () => { cancelled = true; };
+  }, [open]);
+
   if (!open) return null;
+
+  const getBackupFile = async () => backupFileRef.current || (await buildBackupFile());
 
   const handleBackup = async () => {
     setStatus('Preparing backup…');
     try {
-      const did = await runQuotationBackup();
-      setStatus(did ? 'Backup downloaded ✓' : 'No quotations yet to back up.');
+      const file = await getBackupFile();
+      if (!file) { setStatus('No quotations yet to back up.'); return; }
+      downloadBackupFile(file);
+      setStatus('Backup downloaded ✓');
     } catch (e) {
       setStatus('Backup failed. Please try again.');
     }
   };
 
+  // Fires directly from the button's click handler, per Web Share API
+  // requirements: navigator.share() must run inside the user gesture, so
+  // this deliberately avoids any await before it when a pre-built file is
+  // already cached. Any failure other than the user cancelling falls back
+  // to a plain download instead of leaving the user with a dead end.
   const handleShareBackup = async () => {
-    setStatus('Preparing backup…');
-    try {
-      const result = await shareQuotationBackup();
-      if (result.ok) {
-        setStatus(result.reason === 'downloaded' ? 'Backup downloaded ✓' : 'Backup shared ✓');
-      } else if (result.reason === 'cancelled') {
-        setStatus('');
-      } else if (result.reason === 'empty') {
-        setStatus('No quotations yet to back up.');
-      } else {
-        setStatus('Could not share the backup. Please try again.');
+    const cached = backupFileRef.current;
+    const file = cached || await buildBackupFile();
+    if (!file) { setStatus('No quotations yet to back up.'); return; }
+
+    const canFileShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+    if (canFileShare) {
+      try {
+        await navigator.share({ title: 'Quotation App Backup', text: 'Quotation App Backup', files: [file] });
+        setStatus('Backup shared successfully ✓');
+      } catch (error) {
+        if (error && error.name === 'AbortError') { setStatus(''); return; }
+        console.error('Backup share failed:', error);
+        downloadBackupFile(file);
+        setStatus('Could not open the share sheet, so the backup was downloaded instead.');
       }
-    } catch (e) {
-      setStatus('Could not share the backup. Please try again.');
+      return;
     }
+
+    downloadBackupFile(file);
+    setStatus('File sharing is not supported on this browser. Backup downloaded instead.');
   };
 
   const handleRestoreFile = (e) => {
