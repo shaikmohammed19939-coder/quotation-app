@@ -1400,6 +1400,18 @@ const FACTORY_DEFAULT_SIGNATURE = {
     const PREFS_KEY = 'quotation_prefs_v1';
     const AUTO_BACKUP_KEY = 'auto_backup_last_v1';
 
+    async function buildBackupFile() {
+      const index = await loadQuotationIndex();
+      if (!index.length) return null;
+      const docs = {};
+      for (const q of index) {
+        docs[q.id] = await idbGet(quotationDocKey(q.id));
+      }
+      const payload = { exportedAt: Date.now(), index, docs };
+      const filename = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+      return new File([JSON.stringify(payload)], filename, { type: 'application/json' });
+    }
+
     // Downloads a JSON backup of every saved quotation. This file lands in
     // the device's normal Downloads folder, which is OUTSIDE this app's own
     // storage — so unlike the app's on-device data (IndexedDB), it survives
@@ -1407,23 +1419,38 @@ const FACTORY_DEFAULT_SIGNATURE = {
     // Settings > Backup & Data > "Choose Backup File...". Returns false (and
     // downloads nothing) when there are no quotations yet.
     async function runQuotationBackup() {
-      const index = await loadQuotationIndex();
-      if (!index.length) return false;
-      const docs = {};
-      for (const q of index) {
-        docs[q.id] = await idbGet(quotationDocKey(q.id));
-      }
-      const payload = { exportedAt: Date.now(), index, docs };
-      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      const file = await buildBackupFile();
+      if (!file) return false;
+      const url = URL.createObjectURL(file);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+      a.download = file.name;
       document.body.appendChild(a);
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
       return true;
+    }
+
+    // Hands the same backup file to the device's native share sheet, so it
+    // can go straight to Google Drive, Gmail, WhatsApp, etc. in one tap —
+    // no account or server of ours involved, and it lands wherever the user
+    // already keeps things safe. Falls back to a plain download when the
+    // Web Share API (or file sharing specifically) isn't available.
+    async function shareQuotationBackup() {
+      const file = await buildBackupFile();
+      if (!file) return { ok: false, reason: 'empty' };
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file], title: 'Quotation App Backup' });
+          return { ok: true };
+        } catch (e) {
+          if (e && e.name === 'AbortError') return { ok: false, reason: 'cancelled' };
+          return { ok: false, reason: 'error' };
+        }
+      }
+      const did = await runQuotationBackup();
+      return did ? { ok: true, reason: 'downloaded' } : { ok: false, reason: 'empty' };
     }
 
     const APP_THEMES = [
@@ -4603,6 +4630,24 @@ function DataPanel({ open, onClose }) {
     }
   };
 
+  const handleShareBackup = async () => {
+    setStatus('Preparing backup…');
+    try {
+      const result = await shareQuotationBackup();
+      if (result.ok) {
+        setStatus(result.reason === 'downloaded' ? 'Backup downloaded ✓' : 'Backup shared ✓');
+      } else if (result.reason === 'cancelled') {
+        setStatus('');
+      } else if (result.reason === 'empty') {
+        setStatus('No quotations yet to back up.');
+      } else {
+        setStatus('Could not share the backup. Please try again.');
+      }
+    } catch (e) {
+      setStatus('Could not share the backup. Please try again.');
+    }
+  };
+
   const handleRestoreFile = (e) => {
     const file = e.target.files && e.target.files[0];
     e.target.value = '';
@@ -4656,8 +4701,12 @@ function DataPanel({ open, onClose }) {
               Download every saved quotation as a single JSON file you can keep safe or move to another device.
               A backup like this also saves automatically once a day to your Downloads folder, so your data
               survives even if the app itself is ever deleted — just restore it below after reinstalling.
+              Use Share Backup to send it straight to Google Drive, Gmail, or WhatsApp instead.
             </p>
-            <button type="button" className="upload-btn" onClick={handleBackup}>Backup All Quotations</button>
+            <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <button type="button" className="upload-btn" onClick={handleBackup}>Backup All Quotations</button>
+              <button type="button" className="upload-btn" onClick={handleShareBackup}>Share Backup…</button>
+            </div>
           </div>
           <div className="settings-group">
             <h4>Restore</h4>
