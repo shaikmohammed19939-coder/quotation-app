@@ -1398,6 +1398,33 @@ const FACTORY_DEFAULT_SIGNATURE = {
     const STORAGE_LOGO = 'quotation_logo_v1';
     const DOC_KEY = 'quotation_document_v2';
     const PREFS_KEY = 'quotation_prefs_v1';
+    const AUTO_BACKUP_KEY = 'auto_backup_last_v1';
+
+    // Downloads a JSON backup of every saved quotation. This file lands in
+    // the device's normal Downloads folder, which is OUTSIDE this app's own
+    // storage — so unlike the app's on-device data (IndexedDB), it survives
+    // the app itself being deleted/reinstalled and can be brought back with
+    // Settings > Backup & Data > "Choose Backup File...". Returns false (and
+    // downloads nothing) when there are no quotations yet.
+    async function runQuotationBackup() {
+      const index = await loadQuotationIndex();
+      if (!index.length) return false;
+      const docs = {};
+      for (const q of index) {
+        docs[q.id] = await idbGet(quotationDocKey(q.id));
+      }
+      const payload = { exportedAt: Date.now(), index, docs };
+      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      return true;
+    }
 
     const APP_THEMES = [
       { id: 'navy', name: 'Classic Navy', navy: '#0B2E6D', navyDark: '#082250', brandblue: '#1A56C4' },
@@ -4569,22 +4596,8 @@ function DataPanel({ open, onClose }) {
   const handleBackup = async () => {
     setStatus('Preparing backup…');
     try {
-      const index = await loadQuotationIndex();
-      const docs = {};
-      for (const q of index) {
-        docs[q.id] = await idbGet(quotationDocKey(q.id));
-      }
-      const payload = { exportedAt: Date.now(), index, docs };
-      const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 4000);
-      setStatus('Backup downloaded ✓');
+      const did = await runQuotationBackup();
+      setStatus(did ? 'Backup downloaded ✓' : 'No quotations yet to back up.');
     } catch (e) {
       setStatus('Backup failed. Please try again.');
     }
@@ -4641,6 +4654,8 @@ function DataPanel({ open, onClose }) {
             <h4>Backup</h4>
             <p style={{ fontSize: 12.5, color: '#667085', fontFamily: 'Montserrat, sans-serif', margin: '0 0 10px' }}>
               Download every saved quotation as a single JSON file you can keep safe or move to another device.
+              A backup like this also saves automatically once a day to your Downloads folder, so your data
+              survives even if the app itself is ever deleted — just restore it below after reinstalling.
             </p>
             <button type="button" className="upload-btn" onClick={handleBackup}>Backup All Quotations</button>
           </div>
@@ -5183,6 +5198,22 @@ function Root() {
       }
       setReady(true);
       if (window.__hideSplashWhenReady) window.__hideSplashWhenReady();
+
+      // Auto-backup: on-device storage (IndexedDB) is wiped if the app is
+      // ever deleted/reinstalled, same as any app. The only way data can
+      // outlive that is a file saved OUTSIDE the app's own storage — so
+      // once a day, quietly export the same backup file Settings' "Backup
+      // All Quotations" produces, landing it in the device's Downloads
+      // folder. Fire-and-forget: never blocks startup, never breaks it.
+      (async () => {
+        try {
+          const ONE_DAY = 24 * 60 * 60 * 1000;
+          const last = await idbGet(AUTO_BACKUP_KEY);
+          if (last && Date.now() - last < ONE_DAY) return;
+          const did = await runQuotationBackup();
+          if (did) await idbSet(AUTO_BACKUP_KEY, Date.now());
+        } catch (e) {}
+      })();
     })();
   }, []);
 
