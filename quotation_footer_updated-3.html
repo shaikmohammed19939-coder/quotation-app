@@ -1400,7 +1400,7 @@ const FACTORY_DEFAULT_SIGNATURE = {
     const PREFS_KEY = 'quotation_prefs_v1';
     const AUTO_BACKUP_KEY = 'auto_backup_last_v1';
 
-    async function buildBackupFile() {
+    async function buildBackupJSON() {
       const index = await loadQuotationIndex();
       if (!index.length) return null;
       const docs = {};
@@ -1408,8 +1408,28 @@ const FACTORY_DEFAULT_SIGNATURE = {
         docs[q.id] = await idbGet(quotationDocKey(q.id));
       }
       const payload = { exportedAt: Date.now(), index, docs };
+      return JSON.stringify(payload);
+    }
+
+    async function buildBackupFile() {
+      const json = await buildBackupJSON();
+      if (json === null) return null;
       const filename = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-      return new File([JSON.stringify(payload)], filename, { type: 'application/json' });
+      return new File([json], filename, { type: 'application/json' });
+    }
+
+    // Chrome's Web Share API only allows sharing files whose extension is on
+    // its own safe-list (images, PDF, Office docs, .txt, etc.) — .json is
+    // NOT on that list, so navigator.share() rejects a .json File even when
+    // canShare() said yes. Same JSON content, just packaged as .txt/plain
+    // text so the OS share sheet actually accepts it. The regular download
+    // (buildBackupFile, used by "Backup All Quotations" and auto-backup)
+    // stays .json — this variant exists only for the share path.
+    async function buildBackupShareFile() {
+      const json = await buildBackupJSON();
+      if (json === null) return null;
+      const filename = 'quotation_app_backup_' + new Date().toISOString().slice(0, 10) + '.txt';
+      return new File([json], filename, { type: 'text/plain' });
     }
 
     // Triggers a plain browser download of an already-built backup File.
@@ -4610,13 +4630,17 @@ function DataPanel({ open, onClose }) {
   // within the user gesture's activation window, and any I/O beforehand
   // risks that window expiring and share() silently failing.
   const backupFileRef = useRef(null);
+  const shareFileRef = useRef(null);
 
   useEffect(() => {
-    if (!open) { backupFileRef.current = null; return; }
+    if (!open) { backupFileRef.current = null; shareFileRef.current = null; return; }
     let cancelled = false;
     (async () => {
-      const file = await buildBackupFile();
-      if (!cancelled) backupFileRef.current = file;
+      const json = await buildBackupJSON();
+      if (cancelled || json === null) return;
+      const date = new Date().toISOString().slice(0, 10);
+      backupFileRef.current = new File([json], 'quotation_app_backup_' + date + '.json', { type: 'application/json' });
+      shareFileRef.current = new File([json], 'quotation_app_backup_' + date + '.txt', { type: 'text/plain' });
     })();
     return () => { cancelled = true; };
   }, [open]);
@@ -4639,28 +4663,30 @@ function DataPanel({ open, onClose }) {
 
   // Fires directly from the button's click handler, per Web Share API
   // requirements: navigator.share() must run inside the user gesture, so
-  // this deliberately avoids any await before it when a pre-built file is
-  // already cached. Any failure other than the user cancelling falls back
-  // to a plain download instead of leaving the user with a dead end.
+  // this deliberately avoids any await before it when pre-built files are
+  // already cached. Shares the .txt variant (same JSON content) because
+  // Chrome's share safe-list rejects .json; falls back to downloading the
+  // proper .json file on any failure other than the user cancelling.
   const handleShareBackup = async () => {
-    const cached = backupFileRef.current;
-    const file = cached || await buildBackupFile();
-    if (!file) { setStatus('No quotations yet to back up.'); return; }
+    const shareFile = shareFileRef.current || await buildBackupShareFile();
+    if (!shareFile) { setStatus('No quotations yet to back up.'); return; }
 
-    const canFileShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [file] }));
+    const canFileShare = !!(navigator.share && navigator.canShare && navigator.canShare({ files: [shareFile] }));
     if (canFileShare) {
       try {
-        await navigator.share({ title: 'Quotation App Backup', text: 'Quotation App Backup', files: [file] });
+        await navigator.share({ title: 'Quotation App Backup', text: 'Quotation App Backup', files: [shareFile] });
         setStatus('Backup shared successfully ✓');
       } catch (error) {
         if (error && error.name === 'AbortError') { setStatus(''); return; }
         console.error('Backup share failed:', error);
+        const file = await getBackupFile();
         downloadBackupFile(file);
         setStatus('Could not open the share sheet, so the backup was downloaded instead.');
       }
       return;
     }
 
+    const file = await getBackupFile();
     downloadBackupFile(file);
     setStatus('File sharing is not supported on this browser. Backup downloaded instead.');
   };
