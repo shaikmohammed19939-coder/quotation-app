@@ -1659,7 +1659,7 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
     function blankQuotationDoc(category = 'waterproofing') {
       return {
         fields: {
-          quotationNo: '', date: '', clientName: '', siteAddress: '', contactNo: '',
+          quotationNo: '', date: todayDMY(), clientName: '', siteAddress: '', contactNo: '',
           emailId: '', workDescription: category === 'plumbing' ? 'PLUMBING' : '', total: '', receivedAmount: '', sigName: '', sigMobile: ''
         },
         items: [{ id: 1, description: '', unit: '', qty: '', rate: '', amount: '' }],
@@ -1842,6 +1842,13 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
       } catch {
         return String(n);
       }
+    }
+
+    function todayDMY() {
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      return `${dd}/${mm}/${d.getFullYear()}`;
     }
 
     function EditLine({ value, onChange, className = '', placeholder = '', multiline = false, white = false, style = null }) {
@@ -3343,7 +3350,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
   );
 });
 
-function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, onTotalChange, receivedAmount, onReceivedChange }) {
+function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, receivedAmount, onReceivedChange }) {
   const ts = tableSettings || DEFAULT_TABLE_SETTINGS;
   const w = getColumnWidths(ts);
   const cellPad = ts.compactRows ? 'py-[4px]' : 'py-[8px]';
@@ -3409,10 +3416,7 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
             return (
               <React.Fragment>
                 {summaryRow('TOTAL AMOUNT', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0">
-                    <span className="text-[9.5px] text-white shrink-0 amt-nowrap">₹</span>
-                    <EditLine value={total} onChange={onTotalChange} white className="text-right text-[10px] amt-nowrap" style={{ width: '17ch' }} />
-                  </div>
+                  <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(totalNum)}</span>
                 ))}
                 {summaryRow('RECEIVED', 'bg-navy', (
                   <div className="flex items-center gap-[2px] shrink-0">
@@ -3762,10 +3766,11 @@ function SettingsPanel({ open, onClose, tableSettings, onToggleTable, appearance
 }
 
 function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare }) {
-  // All default fields are empty strings – no pre-filled data
+  // All default fields are empty strings – no pre-filled data, except date
+  // which defaults to today so the user doesn't have to type it every time.
   const defaultFields = {
     quotationNo: '',
-    date: '',
+    date: todayDMY(),
     clientName: '',
     siteAddress: '',
     contactNo: '',
@@ -3803,7 +3808,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
   const [layout, setLayoutRaw] = useState({});
   const [companyProfile, setCompanyProfile] = useState({ ...DEFAULT_COMPANY });
 
-  const totalAutoRef = useRef(true);
   const pdfBlobRef = useRef(null);
   const pdfNameRef = useRef('Quotation.pdf');
   const saveTimerRef = useRef(null);
@@ -3888,11 +3892,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
   const setField = (key, val) => {
     beginTypingEdit();
     setFieldsRaw((prev) => ({ ...prev, [key]: val }));
-  };
-
-  const setTotalManual = (val) => {
-    totalAutoRef.current = false;
-    setField('total', val);
   };
 
   const setDocType = (t) => {
@@ -4006,7 +4005,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
     setImagesRaw({ ...defaultImages });
     setTableSettingsRaw({ ...DEFAULT_TABLE_SETTINGS });
     setLayoutRaw({});
-    totalAutoRef.current = true;
     const doc = {
       fields: defaultFields, items: defaultLineItems, docType: 'quotation', category,
       images: defaultImages, tableSettings: DEFAULT_TABLE_SETTINGS, layout: {},
@@ -4016,9 +4014,10 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
     await upsertIndexEntry(quotationId, doc);
   };
 
-  /* ---------------- Auto total (Qty × Rate sum, Indian formatting) ---------------- */
+  /* ---------------- Auto total (Qty × Rate sum, Indian formatting) ----------------
+     Total Amount is always the sum of every row's Amount — never manually
+     typed — so it's guaranteed to stay in sync with the table. */
   useEffect(() => {
-    if (!totalAutoRef.current) return;
     const sum = items.reduce((acc, it) => acc + (parseFloat(String(it.amount).replace(/,/g, '')) || 0), 0);
     const formatted = sum ? formatINR(sum) : '';
     setFieldsRaw((prev) => (prev.total === formatted ? prev : { ...prev, total: formatted }));
@@ -4040,7 +4039,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         setImagesRaw({ ...defaultImages, ...(doc.images || {}) });
         setTableSettingsRaw({ ...DEFAULT_TABLE_SETTINGS, ...(doc.tableSettings || {}) });
         setLayoutRaw(doc.layout || {});
-        totalAutoRef.current = true;
       } else {
         setFieldsRaw({ ...defaultFields });
         setItemsRaw(defaultLineItems);
@@ -4640,7 +4638,6 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
                 onDuplicateRow={duplicateRow}
                 onMoveRow={moveRow}
                 total={fields.total}
-                onTotalChange={setTotalManual}
                 receivedAmount={fields.receivedAmount}
                 onReceivedChange={(v) => setField('receivedAmount', v)}
               />
