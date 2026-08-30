@@ -1844,7 +1844,7 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
       }
     }
 
-    function EditLine({ value, onChange, className = '', placeholder = '', multiline = false, white = false }) {
+    function EditLine({ value, onChange, className = '', placeholder = '', multiline = false, white = false, style = null }) {
       const cls = `edit-line ${white ? 'white-line' : ''} ${className}`;
       const taRef = useRef(null);
 
@@ -1881,6 +1881,7 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        style={style || undefined}
         />
       );
     }
@@ -3389,19 +3390,18 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
           </tr>
           {ts.showAmount && (() => {
             const visibleCount = [ts.showSerial, ts.showDescription, ts.showUnit, ts.showQty, ts.showRate, ts.showAmount].filter(Boolean).length;
-            const boxSpan = Math.min(2, visibleCount);
-            const blankSpan = visibleCount - boxSpan;
             const totalNum = parseFloat(String(total || '0').replace(/,/g, '')) || 0;
             const receivedNum = parseFloat(String(receivedAmount || '0').replace(/,/g, '')) || 0;
             const finalNum = totalNum - receivedNum;
             const summaryRow = (label, bg, valueNode) => (
               <tr>
                 <td className="no-print border-0" />
-                {blankSpan > 0 && <td colSpan={blankSpan} className={`${borderCls} border-t-0`} />}
-                <td colSpan={boxSpan} className={`${borderCls} ${bg} pl-[8px] pr-[16px] py-[4px]`}>
-                  <div className="flex items-center justify-between gap-[6px]">
-                    <span className="text-[9px] font-semibold tracking-[0.02em] text-white shrink-0">{label}</span>
-                    {valueNode}
+                <td colSpan={visibleCount} className={`${borderCls} border-t-0 py-[4px]`}>
+                  <div className="flex justify-end">
+                    <div className={`flex items-center gap-[6px] ${bg} pl-[8px] pr-[16px] py-[4px]`}>
+                      <span className="text-[9px] font-semibold tracking-[0.02em] text-white shrink-0 amt-nowrap">{label}</span>
+                      {valueNode}
+                    </div>
                   </div>
                 </td>
               </tr>
@@ -3409,23 +3409,19 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
             return (
               <React.Fragment>
                 {summaryRow('TOTAL AMOUNT', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0" style={{ width: 56 }}>
-                    <span className="text-[9.5px] text-white shrink-0">₹</span>
-                    <div className="flex-1 min-w-0">
-                      <EditLine value={total} onChange={onTotalChange} white className="text-right text-[10px]" />
-                    </div>
+                  <div className="flex items-center gap-[2px] shrink-0">
+                    <span className="text-[9.5px] text-white shrink-0 amt-nowrap">₹</span>
+                    <EditLine value={total} onChange={onTotalChange} white className="text-right text-[10px] amt-nowrap" style={{ width: '17ch' }} />
                   </div>
                 ))}
                 {summaryRow('RECEIVED', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0" style={{ width: 56 }}>
-                    <span className="text-[9.5px] text-white shrink-0">₹</span>
-                    <div className="flex-1 min-w-0">
-                      <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right text-[10px]" />
-                    </div>
+                  <div className="flex items-center gap-[2px] shrink-0">
+                    <span className="text-[9.5px] text-white shrink-0 amt-nowrap">₹</span>
+                    <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right text-[10px] amt-nowrap" style={{ width: '17ch' }} />
                   </div>
                 ))}
                 {summaryRow('BALANCE', 'bg-brandblue', (
-                  <span className="text-[10px] font-bold text-white shrink-0">₹{formatINR(finalNum)}</span>
+                  <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(finalNum)}</span>
                 ))}
               </React.Fragment>
             );
@@ -4259,17 +4255,18 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
           doc.querySelectorAll('textarea.edit-line, input.edit-line').forEach((el) => {
             const div = doc.createElement('div');
             const isWhite = el.classList.contains('white-line');
+            const isNowrap = el.classList.contains('amt-nowrap');
             const val = el.value || '';
             div.className = el.className;
             div.textContent = val;
             div.style.cssText = [
               'display:block',
-              'width:100%',
-              'max-width:100%',
+              isNowrap ? 'width:auto' : 'width:100%',
+              isNowrap ? '' : 'max-width:100%',
               'box-sizing:border-box',
               'background:transparent',
               'font-family:Montserrat,sans-serif',
-              'font-size:12.5px',
+              isNowrap ? (el.style.fontSize ? 'font-size:' + el.style.fontSize : 'font-size:10px') : 'font-size:12.5px',
               'line-height:18px',
               'color:' + (isWhite ? '#ffffff' : '#0B2E6D'),
               'border:none',
@@ -4277,13 +4274,13 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
               'padding:2px 4px 6px 4px',
               'margin:0',
               'min-height:22px',
-              'white-space:pre-wrap',
-              'word-wrap:break-word',
-              'overflow-wrap:anywhere',
-              'word-break:break-word',
+              isNowrap ? 'white-space:nowrap' : 'white-space:pre-wrap',
+              isNowrap ? '' : 'word-wrap:break-word',
+              isNowrap ? '' : 'overflow-wrap:anywhere',
+              isNowrap ? '' : 'word-break:break-word',
               'overflow:visible',
               'height:auto'
-            ].join(';');
+            ].filter(Boolean).join(';');
             el.parentNode.replaceChild(div, el);
           });
 
