@@ -156,6 +156,18 @@
     .cell-align-wrap.cell-align-top { justify-content: flex-start; }
     .cell-align-wrap.cell-align-center { justify-content: center; }
     .cell-align-wrap.cell-align-bottom { justify-content: flex-end; }
+    /* Description sits in its own cell with no alignment toolbar, but must
+       still bottom-align like the Unit/Qty/Rate/Amount cells (which default
+       to bottom via .cell-align-wrap) so every column's underline lines up
+       on the same row baseline instead of the description's sitting higher
+       whenever a neighboring cell makes the row taller. */
+    .desc-cell-align {
+      min-height: 36px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
     .cell-align-toolbar {
       display: none;
       gap: 4px;
@@ -3291,28 +3303,30 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
       )}
       {ts.showDescription && (
         <td className={`${borderCls} px-[8px] ${cellPad} text-[12.5px] leading-[18px]`}>
-          {ts.richTextEnabled !== false ? (
-            <RichDescriptionEditor
-              value={item.description}
-              onChange={(v) => onUpdateItem(item.id, 'description', v)}
-              placeholder="Enter description…"
-              className="pdf-no-underline"
-              defaultStyle={{
-                fontFamily: defaults.font,
-                fontSize: (defaults.size || 12.5) + 'px',
-                color: defaults.color,
-                textAlign: defaults.align
-              }}
-            />
-          ) : (
-            <EditLine
-              multiline
-              value={stripHtmlToText(item.description)}
-              onChange={(v) => onUpdateItem(item.id, 'description', v)}
-              placeholder="Enter description…"
-              className="pdf-no-underline"
-            />
-          )}
+          <div className="desc-cell-align">
+            {ts.richTextEnabled !== false ? (
+              <RichDescriptionEditor
+                value={item.description}
+                onChange={(v) => onUpdateItem(item.id, 'description', v)}
+                placeholder="Enter description…"
+                className="pdf-no-underline"
+                defaultStyle={{
+                  fontFamily: defaults.font,
+                  fontSize: (defaults.size || 12.5) + 'px',
+                  color: defaults.color,
+                  textAlign: defaults.align
+                }}
+              />
+            ) : (
+              <EditLine
+                multiline
+                value={stripHtmlToText(item.description)}
+                onChange={(v) => onUpdateItem(item.id, 'description', v)}
+                placeholder="Enter description…"
+                className="pdf-no-underline"
+              />
+            )}
+          </div>
         </td>
       )}
       {ts.showUnit && (
