@@ -1,7 +1,7 @@
 {
   "name": "PlumbWork",
   "short_name": "PlumbWork",
-  "description": "Professional Quotation & Bill Maker for Plumbing Specialists",
+  "description": "Professional Quotation & Bill Maker for Plumbing & Waterproofing Specialists",
   "start_url": "./quotation_footer_updated-3.html",
   "scope": "./",
   "display": "standalone",
