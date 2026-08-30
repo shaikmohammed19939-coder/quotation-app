@@ -366,6 +366,13 @@
       border-bottom: 1.5px solid #ffffff !important;
       color: #ffffff !important;
     }
+    /* Items table cells (description/unit/qty/rate/amount): keep the
+       underline on-screen so it's clear where to type, but drop it from
+       the PDF/export output — it's just visual noise on the printed sheet. */
+    body.pdf-exporting .pdf-no-underline,
+    body.pdf-exporting .pdf-no-underline.white-line {
+      border-bottom: none !important;
+    }
     body.pdf-exporting .sheet,
     body.pdf-exporting .sheet *,
     body.pdf-exporting header,
@@ -585,7 +592,7 @@
     .rich-desc ol { margin: 2px 0 2px 18px; padding: 0; list-style: decimal; }
 
     .desc-toolbar-wrap {
-      margin-bottom: 5px;
+      margin-top: 5px;
       background: #eef2fb;
       border: 1px solid #c7d4ee;
       border-radius: 8px;
@@ -596,7 +603,7 @@
       animation: desc-toolbar-in 160ms ease;
       position: relative;
     }
-    @keyframes desc-toolbar-in { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes desc-toolbar-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     .desc-toolbar-row { display: flex; align-items: center; gap: 5px; }
     .dt-close-btn, .dt-btn {
       -webkit-tap-highlight-color: transparent;
@@ -2226,7 +2233,7 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
       );
     }
 
-    function RichDescriptionEditor({ value, onChange, placeholder, defaultStyle }) {
+    function RichDescriptionEditor({ value, onChange, placeholder, defaultStyle, className = '' }) {
       const ref = useRef(null);
       const containerRef = useRef(null);
       const [active, setActive] = useState(false);
@@ -2365,19 +2372,9 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
             }, 220);
           }}
         >
-          {active && (
-            <DescToolbar
-              onCmd={onCmd}
-              onFont={onFont}
-              onSize={onSize}
-              onColor={onColor}
-              activeFormats={activeFormats}
-              onClose={closeToolbar}
-            />
-          )}
           <div
             ref={ref}
-            className="rich-desc"
+            className={`rich-desc ${className}`}
             contentEditable
             suppressContentEditableWarning
             data-placeholder={placeholder}
@@ -2393,6 +2390,16 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
               }, 260);
             }}
           />
+          {active && (
+            <DescToolbar
+              onCmd={onCmd}
+              onFont={onFont}
+              onSize={onSize}
+              onColor={onColor}
+              activeFormats={activeFormats}
+              onClose={closeToolbar}
+            />
+          )}
         </div>
       );
     }
@@ -3289,6 +3296,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
               value={item.description}
               onChange={(v) => onUpdateItem(item.id, 'description', v)}
               placeholder="Enter description…"
+              className="pdf-no-underline"
               defaultStyle={{
                 fontFamily: defaults.font,
                 fontSize: (defaults.size || 12.5) + 'px',
@@ -3302,6 +3310,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
               value={stripHtmlToText(item.description)}
               onChange={(v) => onUpdateItem(item.id, 'description', v)}
               placeholder="Enter description…"
+              className="pdf-no-underline"
             />
           )}
         </td>
@@ -3313,6 +3322,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
             align={item.unitAlign || 'top'}
             onChange={(v) => onUpdateItem(item.id, 'unit', v)}
             onAlignChange={(a) => onUpdateItem(item.id, 'unitAlign', a)}
+            className="pdf-no-underline"
           />
         </td>
       )}
@@ -3323,6 +3333,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
             align={item.qtyAlign}
             onChange={(v) => onUpdateItem(item.id, 'qty', v)}
             onAlignChange={(a) => onUpdateItem(item.id, 'qtyAlign', a)}
+            className="pdf-no-underline"
           />
         </td>
       )}
@@ -3333,6 +3344,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
             align={item.rateAlign}
             onChange={(v) => onUpdateItem(item.id, 'rate', v)}
             onAlignChange={(a) => onUpdateItem(item.id, 'rateAlign', a)}
+            className="pdf-no-underline"
           />
         </td>
       )}
@@ -3343,6 +3355,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
             align={item.amountAlign}
             onChange={(v) => onUpdateItem(item.id, 'amount', v)}
             onAlignChange={(a) => onUpdateItem(item.id, 'amountAlign', a)}
+            className="pdf-no-underline"
           />
         </td>
       )}
@@ -4254,6 +4267,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             const div = doc.createElement('div');
             const isWhite = el.classList.contains('white-line');
             const isNowrap = el.classList.contains('amt-nowrap');
+            const noUnderline = el.classList.contains('pdf-no-underline');
             const val = el.value || '';
             div.className = el.className;
             div.textContent = val;
@@ -4268,7 +4282,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
               'line-height:18px',
               'color:' + (isWhite ? '#ffffff' : '#0B2E6D'),
               'border:none',
-              'border-bottom:1.5px solid ' + (isWhite ? '#ffffff' : '#0B2E6D'),
+              noUnderline ? 'border-bottom:none' : ('border-bottom:1.5px solid ' + (isWhite ? '#ffffff' : '#0B2E6D')),
               'padding:2px 4px 6px 4px',
               'margin:0',
               'min-height:22px',
