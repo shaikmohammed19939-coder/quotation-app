@@ -3398,9 +3398,9 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
               <tr>
                 <td className="no-print border-0" />
                 {blankSpan > 0 && <td colSpan={blankSpan} className={`${borderCls} border-t-0`} />}
-                <td colSpan={boxSpan} className={`${borderCls} ${bg} px-[8px] py-[5px]`}>
-                  <div className="flex items-center justify-between gap-[8px]">
-                    <span className="text-[10.5px] font-semibold tracking-[0.02em] text-white shrink-0">{label}</span>
+                <td colSpan={boxSpan} className={`${borderCls} ${bg} pl-[8px] pr-[16px] py-[4px]`}>
+                  <div className="flex items-center justify-between gap-[6px]">
+                    <span className="text-[9px] font-semibold tracking-[0.02em] text-white shrink-0">{label}</span>
                     {valueNode}
                   </div>
                 </td>
@@ -3409,23 +3409,23 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onAddRow, on
             return (
               <React.Fragment>
                 {summaryRow('TOTAL AMOUNT', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0" style={{ minWidth: 70 }}>
-                    <span className="text-[11px] text-white shrink-0">₹</span>
+                  <div className="flex items-center gap-[2px] shrink-0" style={{ width: 56 }}>
+                    <span className="text-[9.5px] text-white shrink-0">₹</span>
                     <div className="flex-1 min-w-0">
-                      <EditLine value={total} onChange={onTotalChange} white className="text-right" />
+                      <EditLine value={total} onChange={onTotalChange} white className="text-right text-[10px]" />
                     </div>
                   </div>
                 ))}
                 {summaryRow('RECEIVED', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0" style={{ minWidth: 70 }}>
-                    <span className="text-[11px] text-white shrink-0">₹</span>
+                  <div className="flex items-center gap-[2px] shrink-0" style={{ width: 56 }}>
+                    <span className="text-[9.5px] text-white shrink-0">₹</span>
                     <div className="flex-1 min-w-0">
-                      <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right" />
+                      <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right text-[10px]" />
                     </div>
                   </div>
                 ))}
                 {summaryRow('BALANCE', 'bg-brandblue', (
-                  <span className="text-[11.5px] font-bold text-white shrink-0">₹{formatINR(finalNum)}</span>
+                  <span className="text-[10px] font-bold text-white shrink-0">₹{formatINR(finalNum)}</span>
                 ))}
               </React.Fragment>
             );
