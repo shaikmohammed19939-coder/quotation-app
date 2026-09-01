@@ -210,6 +210,7 @@
        focus moves elsewhere, without any JS blur-timer bookkeeping. */
     .styled-field-wrap {
       position: relative;
+      outline: none;
     }
     .format-popover {
       display: none;
@@ -2111,6 +2112,22 @@ const FACTORY_DEFAULT_LOGO_PLUMBING = {
       );
     }
 
+    // For values that are always computed (Total Amount, Balance) — never
+    // directly typed into — but still need the same color/size/bold/etc.
+    // formatting as everything else. tabIndex makes the plain wrapper div
+    // itself focusable (tap/click it, no keyboard needed on touch), which is
+    // enough to satisfy :focus-within and open the popover exactly like a
+    // real input does, with nothing on the page actually becoming editable.
+    function FormattableValue({ text, style, onStyleChange, onResetStyle, className = '' }) {
+      const css = textStyleToCss(style, 10);
+      return (
+        <div className="styled-field-wrap" tabIndex={0}>
+          <span className={className} style={css}>{text}</span>
+          <FormatPopover style={style} onChange={onStyleChange} onReset={onResetStyle} />
+        </div>
+      );
+    }
+
     /* ===================== Toolbar / App-bar icons ===================== */
     function IconSvg({ d, className = '', viewBox = '0 0 24 24', fill = 'none', stroke = 'currentColor' }) {
       return (
@@ -3602,7 +3619,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
   );
 });
 
-function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onUpdateItemStyle, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, receivedAmount, onReceivedChange }) {
+function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onUpdateItemStyle, onAddRow, onRemoveRow, onDuplicateRow, onMoveRow, total, receivedAmount, onReceivedChange, totalStyle, onTotalStyleChange, onResetTotalStyle, balanceStyle, onBalanceStyleChange, onResetBalanceStyle }) {
   const ts = tableSettings || DEFAULT_TABLE_SETTINGS;
   const w = getColumnWidths(ts);
   const cellPad = ts.compactRows ? 'py-[4px]' : 'py-[8px]';
@@ -3679,7 +3696,13 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onUpdateItem
                   <div className="flex justify-end">
                     <div className="bg-navy rounded-[4px] overflow-hidden" style={{ minWidth: 168 }}>
                       {summaryLine('TOTAL AMOUNT', (
-                        <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(totalNum)}</span>
+                        <FormattableValue
+                          text={`₹${formatINR(totalNum)}`}
+                          style={totalStyle}
+                          onStyleChange={onTotalStyleChange}
+                          onResetStyle={onResetTotalStyle}
+                          className="text-[10px] font-bold text-white shrink-0 amt-nowrap"
+                        />
                       ))}
                       {summaryLine('RECEIVED', (
                         <div className="flex items-center gap-[2px] shrink-0">
@@ -3688,7 +3711,13 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onUpdateItem
                         </div>
                       ), 'border-t border-white/25')}
                       {summaryLine('BALANCE', (
-                        <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(finalNum)}</span>
+                        <FormattableValue
+                          text={`₹${formatINR(finalNum)}`}
+                          style={balanceStyle}
+                          onStyleChange={onBalanceStyleChange}
+                          onResetStyle={onResetBalanceStyle}
+                          className="text-[10px] font-bold text-white shrink-0 amt-nowrap"
+                        />
                       ), 'border-t border-white/25 bg-brandblue')}
                     </div>
                   </div>
@@ -4999,6 +5028,12 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
                 total={fields.total}
                 receivedAmount={fields.receivedAmount}
                 onReceivedChange={(v) => setField('receivedAmount', v)}
+                totalStyle={fields.styles && fields.styles.total}
+                onTotalStyleChange={(patch) => setFieldStyle('total', patch)}
+                onResetTotalStyle={() => setFieldStyle('total', null)}
+                balanceStyle={fields.styles && fields.styles.balance}
+                onBalanceStyleChange={(patch) => setFieldStyle('balance', patch)}
+                onResetBalanceStyle={() => setFieldStyle('balance', null)}
               />
             </LayoutSection>
             <LayoutSection id="terms" editEnabled={layoutEditEnabled} layout={layout} onMove={setLayoutPos} onMoveEnd={handleLayoutMoveEnd} label="Terms, Signature & Stamp">
