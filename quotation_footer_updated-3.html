@@ -3333,7 +3333,7 @@ const ItemRow = React.memo(function ItemRow({ item, index, isFirst, isLast, canD
         <td className={`${borderCls} px-[5px] ${cellPad} text-center text-[12.5px] leading-[16px]`}>
           <AlignableCell
             value={item.unit}
-            align={item.unitAlign || 'top'}
+            align={item.unitAlign}
             onChange={(v) => onUpdateItem(item.id, 'unit', v)}
             onAlignChange={(a) => onUpdateItem(item.id, 'unitAlign', a)}
             className="pdf-no-underline"
