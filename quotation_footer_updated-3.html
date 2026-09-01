@@ -3662,34 +3662,38 @@ function ItemsTable({ items, tableSettings, defaults, onUpdateItem, onUpdateItem
             const totalNum = parseFloat(String(total || '0').replace(/,/g, '')) || 0;
             const receivedNum = parseFloat(String(receivedAmount || '0').replace(/,/g, '')) || 0;
             const finalNum = totalNum - receivedNum;
-            const summaryRow = (label, bg, valueNode) => (
+            // Total/Received/Balance render as one merged box (rather than
+            // three separate floating chips) — each line is a row inside it,
+            // divided by a thin hairline, with Balance picked out via a
+            // brandblue fill on the box's own last row.
+            const summaryLine = (label, valueNode, extraCls = '') => (
+              <div className={`flex items-center justify-between gap-[6px] px-[10px] py-[5px] ${extraCls}`}>
+                <span className="text-[9px] font-semibold tracking-[0.02em] text-white shrink-0 amt-nowrap">{label}</span>
+                {valueNode}
+              </div>
+            );
+            return (
               <tr>
                 <td className="no-print border-0" />
                 <td colSpan={visibleCount} className={`${borderCls} border-t-0 py-[4px]`}>
                   <div className="flex justify-end">
-                    <div className={`flex items-center gap-[6px] ${bg} pl-[8px] pr-[16px] py-[4px]`}>
-                      <span className="text-[9px] font-semibold tracking-[0.02em] text-white shrink-0 amt-nowrap">{label}</span>
-                      {valueNode}
+                    <div className="bg-navy rounded-[4px] overflow-hidden" style={{ minWidth: 168 }}>
+                      {summaryLine('TOTAL AMOUNT', (
+                        <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(totalNum)}</span>
+                      ))}
+                      {summaryLine('RECEIVED', (
+                        <div className="flex items-center gap-[2px] shrink-0">
+                          <span className="text-[9.5px] text-white shrink-0 amt-nowrap">₹</span>
+                          <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right text-[10px] amt-nowrap" style={{ width: '17ch' }} />
+                        </div>
+                      ), 'border-t border-white/25')}
+                      {summaryLine('BALANCE', (
+                        <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(finalNum)}</span>
+                      ), 'border-t border-white/25 bg-brandblue')}
                     </div>
                   </div>
                 </td>
               </tr>
-            );
-            return (
-              <React.Fragment>
-                {summaryRow('TOTAL AMOUNT', 'bg-navy', (
-                  <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(totalNum)}</span>
-                ))}
-                {summaryRow('RECEIVED', 'bg-navy', (
-                  <div className="flex items-center gap-[2px] shrink-0">
-                    <span className="text-[9.5px] text-white shrink-0 amt-nowrap">₹</span>
-                    <EditLine value={receivedAmount} onChange={onReceivedChange} white className="text-right text-[10px] amt-nowrap" style={{ width: '17ch' }} />
-                  </div>
-                ))}
-                {summaryRow('BALANCE', 'bg-brandblue', (
-                  <span className="text-[10px] font-bold text-white shrink-0 amt-nowrap">₹{formatINR(finalNum)}</span>
-                ))}
-              </React.Fragment>
             );
           })()}
         </tbody>
@@ -4500,6 +4504,21 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       const sheetWidthCss = Math.ceil(sheetRectCss.width);
       const sheetHeightCss = Math.ceil(sheet.scrollHeight);
 
+      // Page breaks must never fall in the middle of a table row — a
+      // straight fixed-height slice can cut through a row's bottom border
+      // (or its content), and since each page is an independent raster
+      // crop, that border/content is then gone from BOTH pages rather than
+      // duplicated onto either. Record every visible table row's bottom
+      // edge (relative to the sheet) as a safe place to end a page; the
+      // pagination loop below snaps each page's cutoff to the nearest one
+      // of these at or before its naive height limit, so a row (and its
+      // borders) always lands whole on one page.
+      const rowBreakPointsCss = Array.from(sheet.querySelectorAll('table tr'))
+        .filter((tr) => window.getComputedStyle(tr).display !== 'none')
+        .map((tr) => tr.getBoundingClientRect().bottom - sheetRectCss.top)
+        .filter((y) => y > 0 && y <= sheetHeightCss)
+        .sort((a, b) => a - b);
+
       // html2canvas re-clones the whole document into a fresh offscreen
       // iframe on every single call, and different clones can render the
       // same layout with tiny (sub-few-px) differences — so a footer
@@ -4559,7 +4578,13 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             const customFontStyle = el.style.fontStyle || '';
             const customTextDecoration = el.style.textDecoration || '';
             const customTextAlign = el.style.textAlign || '';
+            // Text color is user-customizable, but the underline stays the
+            // fixed theme color regardless — same as on screen, where the
+            // border-bottom's color is a plain CSS rule the `color` property
+            // never touches. Keeping the two independent here too, rather
+            // than tinting the underline to match a custom text color.
             const resolvedColor = customColor || (isWhite ? '#ffffff' : '#0B2E6D');
+            const underlineColor = isWhite ? '#ffffff' : '#0B2E6D';
             div.style.cssText = [
               'display:block',
               isNowrap ? 'width:auto' : 'width:100%',
@@ -4579,7 +4604,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
               // forces a border-bottom color on this element (it keeps the
               // 'edit-line' class after being swapped to a div above), so a
               // plain declaration here would be silently overridden by it.
-              (noUnderline ? 'border-bottom:none' : ('border-bottom:1.5px solid ' + resolvedColor)) + ' !important',
+              (noUnderline ? 'border-bottom:none' : ('border-bottom:1.5px solid ' + underlineColor)) + ' !important',
               'padding:2px 4px 6px 4px',
               'margin:0',
               'min-height:22px',
@@ -4727,9 +4752,31 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         const bodyPortionPx = footerTopPx !== null ? footerTopPx : tileCanvas.height;
 
         const pageSliceCanvasPx = Math.max(1, Math.round(pageSliceCss * scale));
+        // A page must never end mid-row (see rowBreakPointsCss above) — snap
+        // each page's naive cutoff back to the nearest row boundary at or
+        // before it, as long as that still leaves a reasonably full page
+        // (skip snapping when it would make an almost-empty page, or when a
+        // single row is taller than one page and there's nothing to snap to).
+        const minAdvancePx = Math.max(1, pageSliceCanvasPx * 0.4);
+        const snapToRowBreak = (ty, naiveEnd) => {
+          let best = null;
+          for (const breakYCss of rowBreakPointsCss) {
+            const breakCanvasY = (breakYCss - renderedY) * scale;
+            if (breakCanvasY <= ty + minAdvancePx) continue;
+            if (breakCanvasY > naiveEnd) break;
+            best = breakCanvasY;
+          }
+          return best;
+        };
         let ty = 0;
         while (ty < bodyPortionPx) {
-          const sh = Math.min(pageSliceCanvasPx, bodyPortionPx - ty);
+          const naiveEnd = Math.min(ty + pageSliceCanvasPx, bodyPortionPx);
+          let sh = naiveEnd - ty;
+          if (naiveEnd < bodyPortionPx) {
+            const snapped = snapToRowBreak(ty, naiveEnd);
+            if (snapped !== null) sh = Math.round(snapped) - ty;
+          }
+          sh = Math.max(1, Math.min(sh, bodyPortionPx - ty));
           const pageCanvas = sliceCanvas(tileCanvas, ty, ty + sh);
           const sliceData = pageCanvas.toDataURL('image/jpeg', 0.98);
           const sliceHmm = pageCanvas.height * fitRatio;
