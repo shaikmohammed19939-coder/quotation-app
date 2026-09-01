@@ -4797,6 +4797,16 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
           }
           return best;
         };
+        // Table cells use border-collapse, so the line between two rows is a
+        // single shared edge — when a page break snaps to that boundary, the
+        // line renders as the outgoing row's bottom border on the earlier
+        // page and never gets drawn again for the incoming row's top border
+        // on the next page, leaving that row looking "open" at the top. Every
+        // page after the first re-captures a few extra px above its own
+        // start so that shared line is redrawn there too; ty/sh bookkeeping
+        // (how much NEW content each page consumes) is untouched, so this
+        // never double-counts or drifts page to page.
+        const BORDER_OVERLAP_PX = 6;
         let ty = 0;
         while (ty < bodyPortionPx) {
           const naiveEnd = Math.min(ty + pageSliceCanvasPx, bodyPortionPx);
@@ -4806,7 +4816,8 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             if (snapped !== null) sh = Math.round(snapped) - ty;
           }
           sh = Math.max(1, Math.min(sh, bodyPortionPx - ty));
-          const pageCanvas = sliceCanvas(tileCanvas, ty, ty + sh);
+          const cropStart = pagesDrawn > 0 ? Math.max(0, ty - BORDER_OVERLAP_PX) : ty;
+          const pageCanvas = sliceCanvas(tileCanvas, cropStart, ty + sh);
           const sliceData = pageCanvas.toDataURL('image/jpeg', 0.98);
           const sliceHmm = pageCanvas.height * fitRatio;
           if (pagesDrawn > 0) pdf.addPage();
