@@ -4737,6 +4737,18 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         return c;
       };
 
+      // Stack two already-captured canvas slices vertically (cheap — no
+      // re-render), used to prepend a carried border strip onto a page.
+      const concatCanvasesVertical = (top, bottom) => {
+        const c = document.createElement('canvas');
+        c.width = Math.max(top.width, bottom.width);
+        c.height = top.height + bottom.height;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(top, 0, 0);
+        ctx.drawImage(bottom, 0, top.height);
+        return c;
+      };
+
       // Paginate the body (everything above the footer) across as many real
       // A4 pages as it needs, with no shrinking. Each html2canvas capture is
       // kept well under the browser's canvas raster limits (a single capture
@@ -4751,6 +4763,32 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       const pagesPerTile = Math.max(1, Math.floor(SAFE_TILE_CANVAS_PX / (CANVAS_SCALE * pageSliceCss)));
       const tileCssHeight = pagesPerTile * pageSliceCss;
 
+      // A tile batches several pages into one html2canvas call for speed
+      // (see comment above), but its band is otherwise just a fixed pixel
+      // height with no idea where table rows are — if that band ends
+      // mid-row, the row is missing pixels in the capture itself (not just
+      // a bad crop), and no downstream slicing can recover it. Snap the
+      // tile's end to the same row boundaries used for page breaks, so a
+      // tile's raster band never actually clips a row.
+      const TILE_MIN_ADVANCE_CSS = tileCssHeight * 0.5;
+      const snapTileEnd = (fromCss, naiveEndCss) => {
+        let best = null;
+        for (const y of rowBreakPointsCss) {
+          if (y <= fromCss + TILE_MIN_ADVANCE_CSS) continue;
+          if (y > naiveEndCss) break;
+          best = y;
+        }
+        return best;
+      };
+      // A row-boundary line landing exactly on a tile edge is the same
+      // shared-line problem BORDER_OVERLAP_PX solves for page breaks within
+      // one tile — except across tiles there's no shared canvas to crop an
+      // overlap from, since each tile is a separate html2canvas capture.
+      // Carry a thin strip from the bottom of one tile's canvas forward and
+      // prepend it to the first page sliced from the next tile, so that
+      // boundary line gets redrawn there too.
+      let carryTailCanvas = null;
+
       let renderedY = 0;
       let pagesDrawn = 0;
       let lastSliceHmm = 0;
@@ -4763,8 +4801,32 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       // inside it is where we cut the footer away from the trailing body
       // content — using that same tile's own measurement keeps the crop
       // pixel-consistent with what was actually rasterized into it.
+      // Extra CSS px captured past an intended tile-boundary row snap, as a
+      // cushion against the same live-page-vs-clone rendering drift the
+      // captureBand comment already describes elsewhere. Without this, the
+      // requested capture height can land a few px short of or past the
+      // row's true rendered edge in THIS clone, with no way to recover
+      // missing pixels afterward — the observed failure mode being a stray
+      // sliver of the NEXT row bleeding onto the last page of a tile. The
+      // margin is captured but deliberately not "consumed" (renderedY only
+      // advances past the exact snap point), so nothing is skipped — the
+      // next tile just re-captures that region cleanly from its own clone.
+      const TILE_BOUNDARY_SAFETY_CSS = 24;
+
       while (renderedY < sheetHeightCss) {
-        const tileH = Math.min(tileCssHeight, sheetHeightCss - renderedY);
+        const naiveTileEnd = Math.min(renderedY + tileCssHeight, sheetHeightCss);
+        let tileH = naiveTileEnd - renderedY;
+        let tileConsumedCss = tileH;
+        let tileEndedAtRowSnap = false;
+        if (naiveTileEnd < sheetHeightCss) {
+          const snappedTileEnd = snapTileEnd(renderedY, naiveTileEnd);
+          if (snappedTileEnd !== null) {
+            tileConsumedCss = snappedTileEnd - renderedY;
+            tileH = tileConsumedCss + TILE_BOUNDARY_SAFETY_CSS;
+            tileEndedAtRowSnap = true;
+          }
+        }
+        tileH = Math.max(1, Math.min(tileH, sheetHeightCss - renderedY));
         const tileCanvas = await captureBand(renderedY, tileH);
         if (fitRatio === null) fitRatio = maxW / tileCanvas.width;
         const scale = tileCanvas.width / sheetWidthCss;
@@ -4778,7 +4840,13 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             footerBottomPx = Math.min(tileCanvas.height, Math.round((clonedFooterBottomCss - renderedY) * scale));
           }
         }
-        const bodyPortionPx = footerTopPx !== null ? footerTopPx : tileCanvas.height;
+        // The row-snapped boundary (excluding the safety margin above) is
+        // the real edge of usable content in this tile — the margin exists
+        // only to make sure the capture reaches at least that far, never to
+        // be sliced into a page itself.
+        const rowSnapBoundaryPx = tileEndedAtRowSnap ? Math.min(tileCanvas.height, Math.round(tileConsumedCss * scale)) : null;
+        const bodyPortionPx = footerTopPx !== null ? footerTopPx : (rowSnapBoundaryPx !== null ? rowSnapBoundaryPx : tileCanvas.height);
+        const hasMoreContentAfterTile = naiveTileEnd < sheetHeightCss;
 
         const pageSliceCanvasPx = Math.max(1, Math.round(pageSliceCss * scale));
         // A page must never end mid-row (see rowBreakPointsCss above) — snap
@@ -4789,13 +4857,18 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         const minAdvancePx = Math.max(1, pageSliceCanvasPx * 0.4);
         const snapToRowBreak = (ty, naiveEnd) => {
           let best = null;
+          let firstBeyond = null;
           for (const breakYCss of rowBreakPointsCss) {
             const breakCanvasY = (breakYCss - renderedY) * scale;
             if (breakCanvasY <= ty + minAdvancePx) continue;
-            if (breakCanvasY > naiveEnd) break;
-            best = breakCanvasY;
+            if (breakCanvasY <= naiveEnd) { best = breakCanvasY; continue; }
+            if (firstBeyond === null && breakCanvasY <= bodyPortionPx) firstBeyond = breakCanvasY;
           }
-          return best;
+          // A row taller than one nominal page has nothing to snap back to
+          // within the page — extending forward to its real end (instead of
+          // falling through to a naive mid-row cut) is the only way to keep
+          // every row's border intact on a single page.
+          return best !== null ? best : firstBeyond;
         };
         // Table cells use border-collapse, so the line between two rows is a
         // single shared edge — when a page break snaps to that boundary, the
@@ -4816,8 +4889,18 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
             if (snapped !== null) sh = Math.round(snapped) - ty;
           }
           sh = Math.max(1, Math.min(sh, bodyPortionPx - ty));
-          const cropStart = pagesDrawn > 0 ? Math.max(0, ty - BORDER_OVERLAP_PX) : ty;
-          const pageCanvas = sliceCanvas(tileCanvas, cropStart, ty + sh);
+          let pageCanvas;
+          if (ty === 0 && carryTailCanvas) {
+            // First page of a later tile: the row-boundary line right at
+            // this tile's start lives only in the PREVIOUS tile's raster
+            // (this tile starts fresh from here), so stitch the carried
+            // strip on top instead of cropping into this tile's own canvas.
+            pageCanvas = concatCanvasesVertical(carryTailCanvas, sliceCanvas(tileCanvas, 0, ty + sh));
+          } else {
+            const cropStart = pagesDrawn > 0 ? Math.max(0, ty - BORDER_OVERLAP_PX) : ty;
+            pageCanvas = sliceCanvas(tileCanvas, cropStart, ty + sh);
+          }
+          carryTailCanvas = null;
           const sliceData = pageCanvas.toDataURL('image/jpeg', 0.98);
           const sliceHmm = pageCanvas.height * fitRatio;
           if (pagesDrawn > 0) pdf.addPage();
@@ -4830,9 +4913,19 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
         if (footerTopPx !== null && footerBottomPx > footerTopPx) {
           footerCanvas = sliceCanvas(tileCanvas, footerTopPx, footerBottomPx);
           footerHeightMm = footerCanvas.height * fitRatio;
+        } else if (footerTopPx === null && hasMoreContentAfterTile) {
+          // No footer in this tile, and there's still body content ahead in
+          // the next tile — carry the last few px up to the real (unpadded)
+          // boundary forward, so the row-boundary line straddling the two
+          // tiles gets redrawn there too.
+          carryTailCanvas = sliceCanvas(tileCanvas, Math.max(0, bodyPortionPx - BORDER_OVERLAP_PX), bodyPortionPx);
         }
 
-        renderedY += tileH;
+        // Advance by the exact (unpadded) amount actually consumed, never by
+        // the safety-margin-inflated capture height — otherwise the margin
+        // region (which was deliberately left out of every page above) would
+        // be skipped entirely instead of being re-captured by the next tile.
+        renderedY += tileConsumedCss;
       }
 
       // Place the footer, bottom-anchored, on the last page if it fits there
