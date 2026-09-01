@@ -4728,6 +4728,21 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       const imgW = maxW;
       const pxPerMm = sheetWidthCss / pageW;
 
+      // jsPDF leaves the margin strip around each page's image unpainted —
+      // most viewers show that as white (the page's default), but some
+      // (mobile dark-themed PDF viewers in particular) render unpainted
+      // space using their own dark background instead. Where two pages meet
+      // in a continuous-scroll view, two such unpainted margins sit right
+      // next to each other and read as one thick dark bar — even though
+      // every row and border above is already rendered correctly. Painting
+      // every page fully white first removes any unpainted area at all, so
+      // there's nothing left for a viewer's theme to show through.
+      const paintPageWhite = () => {
+        pdf.setFillColor(255, 255, 255);
+        pdf.rect(0, 0, pageW, pageH, 'F');
+      };
+      paintPageWhite();
+
       // Slice an already-captured canvas in memory (cheap — no re-render).
       const sliceCanvas = (source, y0, y1) => {
         const c = document.createElement('canvas');
@@ -4903,7 +4918,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
           carryTailCanvas = null;
           const sliceData = pageCanvas.toDataURL('image/jpeg', 0.98);
           const sliceHmm = pageCanvas.height * fitRatio;
-          if (pagesDrawn > 0) pdf.addPage();
+          if (pagesDrawn > 0) { pdf.addPage(); paintPageWhite(); }
           pdf.addImage(sliceData, 'JPEG', (pageW - imgW) / 2, margin, imgW, sliceHmm, undefined, 'MEDIUM');
           lastSliceHmm = sliceHmm;
           ty += sh;
@@ -4935,7 +4950,7 @@ function Editor({ quotationId, onExitToHome, pendingShare, onConsumePendingShare
       // page is a separate raster image.
       if (footerCanvas) {
         const fitsOnLastPage = pagesDrawn > 0 && lastSliceHmm + footerHeightMm <= maxH;
-        if (pagesDrawn > 0 && !fitsOnLastPage) pdf.addPage();
+        if (pagesDrawn > 0 && !fitsOnLastPage) { pdf.addPage(); paintPageWhite(); }
         const footerY = margin + maxH - footerHeightMm;
         const footerData = footerCanvas.toDataURL('image/jpeg', 0.98);
         pdf.addImage(footerData, 'JPEG', (pageW - imgW) / 2, footerY, imgW, footerHeightMm, undefined, 'MEDIUM');
