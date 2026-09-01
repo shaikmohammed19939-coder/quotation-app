@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quotation-app-shell-v1';
+const CACHE_NAME = 'quotation-app-shell-v2';
 const APP_SHELL = [
   './quotation_footer_updated-3.html',
   './manifest.json',
@@ -29,7 +29,12 @@ self.addEventListener('fetch', (event) => {
 
   if (isAppShellDoc) {
     event.respondWith(
-      fetch(event.request)
+      // cache: 'no-store' bypasses the browser's own HTTP cache (GitHub
+      // Pages serves this file with a Cache-Control that otherwise lets the
+      // browser reuse a stale response for several minutes) so a fixed,
+      // freshly-deployed build is picked up on the very next load instead
+      // of silently continuing to serve whatever was cached before.
+      fetch(event.request, { cache: 'no-store' })
         .then((res) => {
           const copy = res.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
